@@ -130,7 +130,18 @@ public class Board
         {
             for(int c = -1; c <= 1; ++c)
             {
-                if(isInBounds(row + r, col + c) && lowerLayer[row + r][col + c] == BoardTile.MINE.getValue())
+                int testRow = row + r;
+                int testCol = col + c;
+                
+                //Compute wrapped position if needed
+                if(doWrap)
+                {
+                    testRow = (testRow + diff.getSize()) % diff.getSize();
+                    testCol = (testCol + diff.getSize()) % diff.getSize();
+                }
+
+                //Count mine if there is one
+                if(isInBounds(testRow, testCol) && lowerLayer[testRow][testCol] == BoardTile.MINE.getValue())
                 {
                     ++result;
                 }
@@ -163,6 +174,13 @@ public class Board
     //Recursively clear empty spaces around the given space
     public void recursivelyClear(int row, int col)
     {
+        //Compute wrapped position if needed
+        if(doWrap)
+        {
+            row = (row + diff.getSize()) % diff.getSize();
+            col = (col + diff.getSize()) % diff.getSize();
+        }
+
         if(!isInBounds(row, col) || upperLayer[row][col] == BoardTile.CLEARED)
         {
             return;
@@ -188,6 +206,7 @@ public class Board
         }
     }
 
+    //Check if the given space is in bounds
     private boolean isInBounds(int row, int col)
     {
         return (row >= 0 && row < diff.getSize() && col >= 0 && col < diff.getSize());
