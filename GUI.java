@@ -36,6 +36,7 @@ public class GUI implements ActionListener
 
     //Images
     BufferedImage flagBI;
+    BufferedImage badFlagBI;
     BufferedImage mineBI;
     BufferedImage donutBI;
     BufferedImage[] numbersBI;
@@ -51,19 +52,19 @@ public class GUI implements ActionListener
     int numFlags;
     int time;
     String[] gameOverTitles = {
-        "Prognosis: negative",
-        "I'll just step here...",
-        "Why did I sign up for this?",
-        "Give and take",
-        "Do what's right for you"
-    };
+            "Prognosis: negative",
+            "I'll just step here...",
+            "Why did I sign up for this?",
+            "Give and take",
+            "Do what's right for you"
+        };
     String[] gameOverMessages = {
-        "At least the pain only lasted for 0.00002 seconds.",
-        "KA-BLAMO!!!",
-        "Hey, it's a tough job, but someone has to do it. Thank you.",
-        "Sometimes you sweep the mine, and sometimes the mines sweeps you.",
-        "There's no shame in playing on Easy mode."
-    };
+            "At least the pain only lasted for 0.00002 seconds.",
+            "KA-BLAMO!!!",
+            "Hey, it's a tough job, but someone has to do it. Thank you.",
+            "Sometimes you sweep the mine, and sometimes the mines sweeps you.",
+            "There's no shame in playing on Easy mode."
+        };
     Random randMessage;
 
     //Debug
@@ -86,6 +87,7 @@ public class GUI implements ActionListener
             flagBI = ImageIO.read(new File("flag.png"));
             mineBI = ImageIO.read(new File("mine.png"));
             donutBI = ImageIO.read(new File("donut.png"));
+            badFlagBI = ImageIO.read(new File("badFlag.png"));
 
             numbersBI = new BufferedImage[9];
             for(int i = 1; i <= 8; ++i)
@@ -351,7 +353,7 @@ public class GUI implements ActionListener
         boardP.repaint();
         isInputEnabled = true;
     }
-    
+
     //Ends the game based on whether it was a win or loss
     private void doGameOver(boolean isWin)
     {
@@ -359,10 +361,11 @@ public class GUI implements ActionListener
         isInputEnabled = false;
         isGameInProgress = false;
         timer.stop();
-        
+
         //Perform corresponding action
         if(!isWin)
         {
+            checkForBadFlags();
             boardP.repaint(); //update to show hit mine
             int choice = promptRestartOnLoss();
             if(choice == JOptionPane.NO_OPTION || choice == JOptionPane.CLOSED_OPTION) //quit game
@@ -377,6 +380,21 @@ public class GUI implements ActionListener
         }
         else
         {
+        }
+    }
+
+    private void checkForBadFlags()
+    {
+        int size = board.getDiff().getSize();
+        for(int row = 0; row < size; ++row)
+        {
+            for(int col = 0; col < size; ++col)
+            {
+                if(board.getUpperTile(row, col) == BoardTile.FLAGGED && board.getLowerInt(row, col) != BoardTile.MINE.getValue())
+                {
+                    board.setUpperTile(BoardTile.BAD_FLAG, row, col);
+                }
+            }
         }
     }
 
@@ -407,7 +425,7 @@ public class GUI implements ActionListener
     {
         JOptionPane.showMessageDialog(frame, message, "Error!", JOptionPane.ERROR_MESSAGE);
     }
-    
+
     private int promptRestartOnLoss()
     {
         int index = randMessage.nextInt(gameOverMessages.length);
@@ -477,6 +495,10 @@ public class GUI implements ActionListener
 
                 case HIT_MINE:
                 g2d.drawImage(mineBI, x, y, tileSize, tileSize, MyColors.HIT_MINE, null);
+                break;
+
+                case BAD_FLAG:
+                g2d.drawImage(badFlagBI, x, y, tileSize, tileSize, MyColors.HIDDEN_COLOR, null);
                 break;
             }
         }
