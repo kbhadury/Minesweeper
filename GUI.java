@@ -6,6 +6,7 @@ import javax.swing.border.*;
 import java.io.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 public class GUI implements ActionListener
 {
@@ -39,7 +40,7 @@ public class GUI implements ActionListener
     BufferedImage donutBI;
     BufferedImage[] numbersBI;
 
-    //Mode select options
+    //Overwritten selection options
     final int CLASSIC_OPTION = JOptionPane.YES_OPTION;
     final int DONUT_OPTION = JOptionPane.NO_OPTION;
 
@@ -49,10 +50,26 @@ public class GUI implements ActionListener
     boolean isInputEnabled;
     int numFlags;
     int time;
+    String[] gameOverTitles = {
+        "Prognosis: negative",
+        "I'll just step here...",
+        "Why did I sign up for this?",
+        "Give and take",
+        "Do what's right for you"
+    };
+    String[] gameOverMessages = {
+        "At least the pain only lasted for 0.00002 seconds.",
+        "KA-BLAMO!!!",
+        "Hey, it's a tough job, but someone has to do it. Thank you.",
+        "Sometimes you sweep the mine, and sometimes the mines sweeps you.",
+        "There's no shame in playing on Easy mode."
+    };
+    Random randMessage;
 
     //Debug
     String sampleLB = "Kevin: 06:31\nJeff: 03:19\nKaren: 12:25";
 
+    //Constructor
     public GUI()
     {
         board = new Board(Difficulty.MEDIUM, Mode.CLASSIC, false); //init to Medium
@@ -61,6 +78,7 @@ public class GUI implements ActionListener
         numFlags = 0;
         time = 0;
         timer = new Timer(1000, this);
+        randMessage = new Random();
 
         //Load images
         try
@@ -82,6 +100,7 @@ public class GUI implements ActionListener
         }
     }
 
+    //Handles GUI initialization
     public void createGUI()
     {
         //Set up fonts
@@ -204,55 +223,7 @@ public class GUI implements ActionListener
         frame.setVisible(true);
     }
 
-    //Resets GUI with stats and repaints board
-    private void startNewGame()
-    {
-        //Reset stats
-        numFlags = 0;
-        time = 0;
-        flagsL.setText("0");
-        minesL.setText("" + board.getDiff().getMines());
-        timerL.setText("00:00");
-
-        JTabbedPane currTP = null;
-
-        switch(board.getMode())
-        {
-            case CLASSIC:
-            leaderboardModeTP.setSelectedIndex(0);
-            currTP = leaderboardClassicTP;
-            break;
-
-            case DONUT:
-            leaderboardModeTP.setSelectedIndex(1);
-            currTP = leaderboardDonutTP;
-            break;
-        }
-
-        switch(board.getDiff())
-        {
-            case EASY:
-            currTP.setSelectedIndex(0);
-            break;
-
-            case MEDIUM:
-            currTP.setSelectedIndex(1);
-            break;
-
-            case HARD:
-            currTP.setSelectedIndex(2);
-            break;
-
-            case EXTREME:
-            currTP.setSelectedIndex(3);
-            break;
-        }
-
-        //Repaint board and enable play
-        boardP.repaint();
-        isInputEnabled = true;
-    }
-
+    //Input handler for GUI components
     public void actionPerformed(ActionEvent e)
     {
         if(e.getSource() == timer)
@@ -306,6 +277,7 @@ public class GUI implements ActionListener
         }
     }
 
+    /*****Start game routines*****/
     //Gets mode and wrap options and calls board constructor
     //Returns false if the user doesn't specify all options
     private boolean promptOptionsAndInitBoard(Difficulty diff)
@@ -331,6 +303,84 @@ public class GUI implements ActionListener
         return true;
     }
 
+    //Resets GUI with stats and repaints board
+    private void startNewGame()
+    {
+        //Reset stats
+        numFlags = 0;
+        time = 0;
+        flagsL.setText("0");
+        minesL.setText("" + board.getDiff().getMines());
+        timerL.setText("00:00");
+
+        JTabbedPane currTP = null;
+
+        switch(board.getMode())
+        {
+            case CLASSIC:
+            leaderboardModeTP.setSelectedIndex(0);
+            currTP = leaderboardClassicTP;
+            break;
+
+            case DONUT:
+            leaderboardModeTP.setSelectedIndex(1);
+            currTP = leaderboardDonutTP;
+            break;
+        }
+
+        switch(board.getDiff())
+        {
+            case EASY:
+            currTP.setSelectedIndex(0);
+            break;
+
+            case MEDIUM:
+            currTP.setSelectedIndex(1);
+            break;
+
+            case HARD:
+            currTP.setSelectedIndex(2);
+            break;
+
+            case EXTREME:
+            currTP.setSelectedIndex(3);
+            break;
+        }
+
+        //Repaint board and enable play
+        boardP.repaint();
+        isInputEnabled = true;
+    }
+    
+    //Ends the game based on whether it was a win or loss
+    private void doGameOver(boolean isWin)
+    {
+        //Stop the game
+        isInputEnabled = false;
+        isGameInProgress = false;
+        timer.stop();
+        
+        //Perform corresponding action
+        if(!isWin)
+        {
+            boardP.repaint(); //update to show hit mine
+            int choice = promptRestartOnLoss();
+            if(choice == JOptionPane.NO_OPTION || choice == JOptionPane.CLOSED_OPTION) //quit game
+            {
+                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+            }
+            else if(choice == JOptionPane.YES_OPTION) //reset game
+            {
+                if(promptOptionsAndInitBoard(board.getDiff()))
+                    startNewGame();
+            }
+        }
+        else
+        {
+        }
+    }
+
+    /****Start dialog box routines*****/
     //Returns int so we can detect if window closed
     private int promptMode()
     {
@@ -357,6 +407,16 @@ public class GUI implements ActionListener
     {
         JOptionPane.showMessageDialog(frame, message, "Error!", JOptionPane.ERROR_MESSAGE);
     }
+    
+    private int promptRestartOnLoss()
+    {
+        int index = randMessage.nextInt(gameOverMessages.length);
+        String title = gameOverTitles[index];
+        String message = gameOverMessages[index];
+        Object[] options = {"Yeah, let's do it!", "No, I quit"};
+        return JOptionPane.showOptionDialog(frame, "<html><body><p style='width: 200px;'>"+ message +"\n\nTry again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, options, null);
+    }
+    /*****End dialog box routines*****/
 
     //Custom class to draw Minesweeper grid
     private class BoardPanel extends JPanel implements MouseListener
@@ -426,7 +486,7 @@ public class GUI implements ActionListener
         {
             if(!isInputEnabled)
                 return;
-                
+
             //Get tile position
             int row = e.getY() / tileSize;
             int col = e.getX() / tileSize;
@@ -445,7 +505,9 @@ public class GUI implements ActionListener
                 int tile = board.getLowerInt(row, col);
                 if(tile == BoardTile.MINE.getValue())
                 {
-                    board.setUpperTile(BoardTile.MINE, row, col);
+                    board.setUpperTile(BoardTile.HIT_MINE, row, col);
+                    doGameOver(false);
+                    return;
                 }
                 else if(tile == 0)
                 {

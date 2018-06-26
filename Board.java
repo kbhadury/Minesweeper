@@ -8,6 +8,7 @@ public class Board
     int[][] lowerLayer;
     BoardTile[][] upperLayer;
 
+    //Constructor
     public Board(Difficulty diff, Mode mode, boolean doWrap)
     {
         this.diff = diff;
@@ -17,6 +18,7 @@ public class Board
         generateEmptyField(); //filled after first click
     }
 
+    /*****Start getters and setters*****/
     public Difficulty getDiff()
     {
         return diff;
@@ -41,35 +43,11 @@ public class Board
     {
         upperLayer[row][col] = tile;
     }
+    /*****End getters and setters*****/
 
-    //Recursively clear empty spaces around the given space
-    public void recursivelyClear(int row, int col)
-    {
-        if(!isInBounds(row, col) || upperLayer[row][col] == BoardTile.CLEARED)
-            return;
-
-        //Clear regardless, since we want to reveal numbered spaces on edges of clear area
-        upperLayer[row][col] = BoardTile.CLEARED;
-
-        if(lowerLayer[row][col] != 0)
-        {
-            return;
-        }
-        else
-        {
-            recursivelyClear(row - 1, col - 1);
-            recursivelyClear(row - 1, col);
-            recursivelyClear(row - 1, col + 1);
-            recursivelyClear(row, col - 1);
-            recursivelyClear(row, col + 1);
-            recursivelyClear(row + 1, col - 1);
-            recursivelyClear(row + 1, col);
-            recursivelyClear(row + 1, col + 1);            
-        }
-    }
-
+    /*****Start board operations*****/
     //Creates a minefield with no mines
-    private void generateEmptyField()
+    public void generateEmptyField()
     {
         int size = diff.getSize();
         int mines = diff.getMines();
@@ -131,9 +109,37 @@ public class Board
 
         return result;
     }
+    
+    //Recursively clear empty spaces around the given space
+    public void recursivelyClear(int row, int col)
+    {
+        if(!isInBounds(row, col) || upperLayer[row][col] == BoardTile.CLEARED)
+            return;
 
+        //Clear regardless, since we want to reveal numbered spaces on edges of clear area
+        upperLayer[row][col] = BoardTile.CLEARED;
+
+        if(lowerLayer[row][col] != 0)
+        {
+            return;
+        }
+        else
+        {
+            recursivelyClear(row - 1, col - 1);
+            recursivelyClear(row - 1, col);
+            recursivelyClear(row - 1, col + 1);
+            recursivelyClear(row, col - 1);
+            recursivelyClear(row, col + 1);
+            recursivelyClear(row + 1, col - 1);
+            recursivelyClear(row + 1, col);
+            recursivelyClear(row + 1, col + 1);            
+        }
+    }
+    
+    
     private boolean isInBounds(int row, int col)
     {
         return (row >= 0 && row < diff.getSize() && col >= 0 && col < diff.getSize());
     }
+    /*****End board operations*****/
 }
