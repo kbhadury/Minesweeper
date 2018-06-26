@@ -37,6 +37,7 @@ public class GUI implements ActionListener
     BufferedImage flagBI;
     BufferedImage mineBI;
     BufferedImage donutBI;
+    BufferedImage[] numbersBI;
 
     //Mode select options
     final int CLASSIC_OPTION = JOptionPane.YES_OPTION;
@@ -67,6 +68,12 @@ public class GUI implements ActionListener
             flagBI = ImageIO.read(new File("flag.png"));
             mineBI = ImageIO.read(new File("mine.png"));
             donutBI = ImageIO.read(new File("donut.png"));
+
+            numbersBI = new BufferedImage[9];
+            for(int i = 1; i <= 8; ++i)
+            {
+                numbersBI[i] = ImageIO.read(new File(i + ".png"));
+            }
         }
         catch(IOException ioEx)
         {
@@ -396,19 +403,18 @@ public class GUI implements ActionListener
                 g2d.fillRect(x, y, tileSize, tileSize);
                 if(board.getLowerInt(row, col) > 0)
                 {
-                    g2d.setColor(MyColors.NUMBER_COLOR);
-                    g2d.drawString("" + board.getLowerInt(row, col), x + tileSize/2, y + tileSize/2);
+                    g2d.drawImage(numbersBI[board.getLowerInt(row, col)], x, y, tileSize, tileSize, MyColors.CLEARED_COLOR, null);
                 }
                 break;
 
                 case FLAGGED:
                 g2d.drawImage(flagBI, x+2, y+2, tileSize-2, tileSize-2, MyColors.HIDDEN_COLOR, null);
                 break;
-                
+
                 case MINE:
                 g2d.drawImage(mineBI, x, y, tileSize, tileSize, MyColors.HIDDEN_COLOR, null);
                 break;
-                
+
                 case HIT_MINE:
                 g2d.drawImage(mineBI, x, y, tileSize, tileSize, MyColors.HIT_MINE, null);
                 break;
