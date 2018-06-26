@@ -14,19 +14,19 @@ public class Board
         this.mode = mode;
         this.doWrap = doWrap;
 
-        generateBoard();
+        generateEmptyField(); //filled after first click
     }
 
     public Difficulty getDiff()
     {
         return diff;
     }
-    
+
     public Mode getMode()
     {
         return mode;
     }
-    
+
     public int getLowerInt(int row, int col)
     {
         return lowerLayer[row][col];
@@ -42,25 +42,67 @@ public class Board
         upperLayer[row][col] = tile;
     }
 
-    private void generateBoard()
+    //Recursively clear empty spaces around the given space
+    public void recursivelyClear(int row, int col)
+    {
+        if(!isInBounds(row, col) || upperLayer[row][col] == BoardTile.CLEARED)
+            return;
+
+        //Clear regardless, since we want to reveal numbered spaces on edges of clear area
+        upperLayer[row][col] = BoardTile.CLEARED;
+
+        if(lowerLayer[row][col] != 0)
+        {
+            return;
+        }
+        else
+        {
+            recursivelyClear(row - 1, col - 1);
+            recursivelyClear(row - 1, col);
+            recursivelyClear(row - 1, col + 1);
+            recursivelyClear(row, col - 1);
+            recursivelyClear(row, col + 1);
+            recursivelyClear(row + 1, col - 1);
+            recursivelyClear(row + 1, col);
+            recursivelyClear(row + 1, col + 1);            
+        }
+    }
+
+    //Creates a minefield with no mines
+    private void generateEmptyField()
     {
         int size = diff.getSize();
         int mines = diff.getMines();
-        
+
         lowerLayer = new int[size][size];
         upperLayer = new BoardTile[size][size];
 
-        //Setup upper layer
+        //Setup empty layers
         for(int row = 0; row < size; ++row)
+        {
             for(int col = 0; col < size; ++col)
+            {
                 upperLayer[row][col] = BoardTile.HIDDEN;
+                lowerLayer[row][col] = 0;
+            }
+        }
+    }
 
-        //Setup lower layer with randomly-placed mines
+    //Adds mines and numbers to the board, avoiding the given space
+    public void addMinesAndAvoid(int badRow, int badCol)
+    {
+        int size = diff.getSize();
+        int mines = diff.getMines();
         int[] availableSpaces = new int[size*size];
         for(int i = 0; i < availableSpaces.length; ++i)
             availableSpaces[i] = i;
+
+        //Remove the given space
+        availableSpaces[badRow*size + badCol] = availableSpaces[availableSpaces.length - 1];
+        availableSpaces[availableSpaces.length - 1] = -1;
+
         Random random = new Random();
-        for(int j = 0; j < mines; ++j)
+        for(int j = 1; j <= mines; ++j)
         {
             //Thanks, Sean
             int selectedIndex = random.nextInt(availableSpaces.length - j);

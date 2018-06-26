@@ -426,17 +426,20 @@ public class GUI implements ActionListener
         {
             if(!isInputEnabled)
                 return;
+                
+            //Get tile position
+            int row = e.getY() / tileSize;
+            int col = e.getX() / tileSize;
 
             //Only start timer once first tile is clicked
             if(!isGameInProgress)
             {
                 isGameInProgress = true;
+                board.addMinesAndAvoid(row, col);
                 timer.start();
             }
 
             //Update tile
-            int row = e.getY() / tileSize;
-            int col = e.getX() / tileSize;
             if(e.getButton() == MouseEvent.BUTTON1 && board.getUpperTile(row, col) != BoardTile.FLAGGED) //right click
             {
                 int tile = board.getLowerInt(row, col);
@@ -446,7 +449,7 @@ public class GUI implements ActionListener
                 }
                 else if(tile == 0)
                 {
-                    board.setUpperTile(BoardTile.CLEARED, row, col);
+                    board.recursivelyClear(row, col);
                 }
                 else //number
                 {
