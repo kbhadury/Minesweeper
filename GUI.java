@@ -236,42 +236,60 @@ public class GUI implements ActionListener
         else if(e.getSource() == easyMI)
         {
             if(isGameInProgress && !confirmAction("This will quit the current game.  Proceed?", "Are you sure?"))
+            {
                 return;
+            }
             isInputEnabled = false;
             isGameInProgress = false;
             timer.stop();
             if(promptOptionsAndInitBoard(Difficulty.EASY))
+            {
                 startNewGame();
+            }
         }
         else if(e.getSource() == mediumMI)
         {
             if(isGameInProgress && !confirmAction("This will quit the current game.  Proceed?", "Are you sure?"))
+            {
                 return;
+            }
             isInputEnabled = false;
             isGameInProgress = false;
             timer.stop();
             if(promptOptionsAndInitBoard(Difficulty.MEDIUM))
+            {
                 startNewGame();
+            }
         }
         else if(e.getSource() == hardMI)
         {
             if(isGameInProgress && !confirmAction("This will quit the current game.  Proceed?", "Are you sure?"))
+            {
                 return;
+            }
+            
             isInputEnabled = false;
             isGameInProgress = false;
             timer.stop();
             if(promptOptionsAndInitBoard(Difficulty.HARD))
+            {
                 startNewGame();
+            }
         }
         else if(e.getSource() == extremeMI)
         {
             if(isGameInProgress && !confirmAction("This will quit the current game.  Proceed?", "Are you sure?"))
+            {
                 return;
+            }
+            
             isInputEnabled = false;
             isGameInProgress = false;
             timer.stop();
             if(promptOptionsAndInitBoard(Difficulty.EXTREME))
+            {
                 startNewGame();
+            }
         }
         else if(e.getSource() == quitMI)
         {
@@ -289,17 +307,27 @@ public class GUI implements ActionListener
 
         int modePrompt = promptMode();
         if(modePrompt == JOptionPane.CLOSED_OPTION)
+        {
             return false;
+        }
         else if(modePrompt == CLASSIC_OPTION)
+        {
             mode = Mode.CLASSIC;
+        }
         else
+        {
             mode = Mode.DONUT;
+        }
 
         int wrapPrompt = promptWrap();
         if(wrapPrompt == JOptionPane.CLOSED_OPTION)
+        {
             return false;
+        }
         else
+        {
             doWrap = (wrapPrompt == JOptionPane.YES_OPTION);
+        }
 
         board = new Board(diff, mode, doWrap);
         return true;
@@ -363,23 +391,29 @@ public class GUI implements ActionListener
         timer.stop();
 
         //Perform corresponding action
+        int choice;
         if(!isWin)
         {
             checkForBadFlags();
-            boardP.repaint(); //update to show hit mine
-            int choice = promptRestartOnLoss();
-            if(choice == JOptionPane.NO_OPTION || choice == JOptionPane.CLOSED_OPTION) //quit game
-            {
-                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-            }
-            else if(choice == JOptionPane.YES_OPTION) //reset game
-            {
-                if(promptOptionsAndInitBoard(board.getDiff()))
-                    startNewGame();
-            }
+            board.revealMines();
+            boardP.repaint();
+            choice = promptRestartOnLoss();
         }
         else
         {
+            board.revealMines();
+            boardP.repaint();
+            choice = promptRestartOnWin();
+        }
+
+        if(choice == JOptionPane.NO_OPTION || choice == JOptionPane.CLOSED_OPTION) //quit game
+        {
+            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+        }
+        else if(choice == JOptionPane.YES_OPTION) //reset game
+        {
+            if(promptOptionsAndInitBoard(board.getDiff()))
+                startNewGame();
         }
     }
 
@@ -396,6 +430,15 @@ public class GUI implements ActionListener
                 }
             }
         }
+    }
+
+    private boolean checkForWin()
+    {
+        int size = board.getDiff().getSize();
+        int numSpaces = size*size;
+        int numMines = board.getDiff().getMines();
+        int numClearSpaces = board.getNumClearSpaces();
+        return (numSpaces - numMines == numClearSpaces);
     }
 
     /****Start dialog box routines*****/
@@ -434,6 +477,12 @@ public class GUI implements ActionListener
         Object[] options = {"Yeah, let's do it!", "No, I quit"};
         return JOptionPane.showOptionDialog(frame, "<html><body><p style='width: 200px;'>"+ message +"\n\nTry again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, options, null);
     }
+    
+    private int promptRestartOnWin()
+    {
+        Object[] options = {"Yeah, let's do it!", "No, I quit"};
+        return JOptionPane.showOptionDialog(frame, "Consider those mines swept!  Play again?", "Woo hoo!", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
+    }
     /*****End dialog box routines*****/
 
     //Custom class to draw Minesweeper grid
@@ -454,8 +503,12 @@ public class GUI implements ActionListener
 
             //Draw tiles
             for(int row = 0; row < size; ++row)
+            {
                 for(int col = 0; col < size; ++col)
+                {
                     drawTile(board.getUpperTile(row, col), row, col, col*tileSize, row*tileSize);
+                }
+            }
 
             //Draw gridlines
             g2d.setColor(MyColors.CLEARED_COLOR);
@@ -507,7 +560,9 @@ public class GUI implements ActionListener
         public void mouseClicked(MouseEvent e)
         {
             if(!isInputEnabled)
+            {
                 return;
+            }
 
             //Get tile position
             int row = e.getY() / tileSize;
@@ -538,6 +593,10 @@ public class GUI implements ActionListener
                 else //number
                 {
                     board.setUpperTile(BoardTile.CLEARED, row, col);
+                }
+                if(checkForWin())
+                {
+                    doGameOver(true);
                 }
             }
             else if(e.getButton() == MouseEvent.BUTTON3 && board.getUpperTile(row, col) == BoardTile.HIDDEN) //left click on hidden

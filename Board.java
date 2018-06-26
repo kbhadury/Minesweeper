@@ -39,6 +39,24 @@ public class Board
         return upperLayer[row][col];
     }
 
+    public int getNumClearSpaces()
+    {
+        int count = 0;
+        int size = diff.getSize();
+        for(int row = 0; row < size; ++row)
+        {
+            for(int col = 0; col < size; ++col)
+            {
+                if(upperLayer[row][col] == BoardTile.CLEARED)
+                {
+                    ++count;
+                }
+            }
+        }
+
+        return count;
+    }
+
     public void setUpperTile(BoardTile tile, int row, int col)
     {
         upperLayer[row][col] = tile;
@@ -73,7 +91,9 @@ public class Board
         int mines = diff.getMines();
         int[] availableSpaces = new int[size*size];
         for(int i = 0; i < availableSpaces.length; ++i)
+        {
             availableSpaces[i] = i;
+        }
 
         //Remove the given space
         availableSpaces[badRow*size + badCol] = availableSpaces[availableSpaces.length - 1];
@@ -92,29 +112,61 @@ public class Board
 
         //Count mines
         for(int row = 0; row < size; ++row)
+        {
             for(int col = 0; col < size; ++col)
+            {
                 if(lowerLayer[row][col] != BoardTile.MINE.getValue())
+                {
                     lowerLayer[row][col] = countMinesAround(row, col);
+                }
+            }
+        }
     }
 
     private int countMinesAround(int row, int col)
     {
         int result = 0;
         for(int r = -1; r <= 1; ++r)
+        {
             for(int c = -1; c <= 1; ++c)
+            {
                 if(isInBounds(row + r, col + c) && lowerLayer[row + r][col + c] == BoardTile.MINE.getValue())
+                {
                     ++result;
+                }
+            }
+        }
         if(lowerLayer[row][col] == BoardTile.MINE.getValue())
+        {
             --result; //avoid counting ourself;
+        }
 
         return result;
     }
-    
+
+    //Used at end-game
+    public void revealMines()
+    {
+        int size = diff.getSize();
+        for(int row = 0; row < size; ++row)
+        {
+            for(int col = 0; col < size; ++col)
+            {
+                if(lowerLayer[row][col] == BoardTile.MINE.getValue())
+                {
+                    upperLayer[row][col] = BoardTile.MINE;
+                }
+            }
+        }
+    }
+
     //Recursively clear empty spaces around the given space
     public void recursivelyClear(int row, int col)
     {
         if(!isInBounds(row, col) || upperLayer[row][col] == BoardTile.CLEARED)
+        {
             return;
+        }
 
         //Clear regardless, since we want to reveal numbered spaces on edges of clear area
         upperLayer[row][col] = BoardTile.CLEARED;
@@ -135,8 +187,7 @@ public class Board
             recursivelyClear(row + 1, col + 1);            
         }
     }
-    
-    
+
     private boolean isInBounds(int row, int col)
     {
         return (row >= 0 && row < diff.getSize() && col >= 0 && col < diff.getSize());
