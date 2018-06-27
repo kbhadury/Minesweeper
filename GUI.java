@@ -267,7 +267,7 @@ public class GUI implements ActionListener
             {
                 return;
             }
-            
+
             isInputEnabled = false;
             isGameInProgress = false;
             timer.stop();
@@ -282,7 +282,7 @@ public class GUI implements ActionListener
             {
                 return;
             }
-            
+
             isInputEnabled = false;
             isGameInProgress = false;
             timer.stop();
@@ -304,6 +304,19 @@ public class GUI implements ActionListener
     {
         Mode mode;
         boolean doWrap;
+        
+        if(diff == null)
+        {
+            String diffStr = promptDiff();
+            if(diffStr == null) //closed dialog box
+            {
+                return false;
+            }
+            else
+            {
+                diff = Difficulty.valueOf(diffStr.toUpperCase());
+            }
+        }
 
         int modePrompt = promptMode();
         if(modePrompt == JOptionPane.CLOSED_OPTION)
@@ -412,7 +425,7 @@ public class GUI implements ActionListener
         }
         else if(choice == JOptionPane.YES_OPTION) //reset game
         {
-            if(promptOptionsAndInitBoard(board.getDiff()))
+            if(promptOptionsAndInitBoard(null))
                 startNewGame();
         }
     }
@@ -442,6 +455,27 @@ public class GUI implements ActionListener
     }
 
     /****Start dialog box routines*****/
+    //Returns user's choice as a String, or null if cancelled
+    private String promptDiff()
+    {
+        Object[] options = {
+            "Easy (" + Difficulty.EASY.getSize() + "x" + Difficulty.EASY.getSize() + ", " + Difficulty.EASY.getMines() + " mines)",
+            "Medium (" + Difficulty.MEDIUM.getSize() + "x" + Difficulty.MEDIUM.getSize() + ", " + Difficulty.MEDIUM.getMines() + " mines)",
+            "Hard (" + Difficulty.HARD.getSize() + "x" + Difficulty.HARD.getSize() + ", " + Difficulty.HARD.getMines() + " mines)",
+            "Extreme (" + Difficulty.EXTREME.getSize() + "x" + Difficulty.EXTREME.getSize() + ", " + Difficulty.EXTREME.getMines() + " mines)"
+        };
+        
+        String result = (String)JOptionPane.showInputDialog(frame, "Choose your difficulty", "Difficulty", JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+        if(result == null)
+        {
+            return null;
+        }
+        else
+        {
+            return (result.split(" "))[0]; //get difficulty only
+        }
+    }
+
     //Returns int so we can detect if window closed
     private int promptMode()
     {
@@ -477,7 +511,7 @@ public class GUI implements ActionListener
         Object[] options = {"Yeah, let's do it!", "No, I quit"};
         return JOptionPane.showOptionDialog(frame, "<html><body><p style='width: 200px;'>"+ message +"\n\nTry again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, options, null);
     }
-    
+
     private int promptRestartOnWin()
     {
         Object[] options = {"Yeah, let's do it!", "No, I quit"};
