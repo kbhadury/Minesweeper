@@ -46,6 +46,9 @@ public class GUI implements ActionListener
     final int CLASSIC_OPTION = JOptionPane.YES_OPTION;
     final int DONUT_OPTION = JOptionPane.NO_OPTION;
 
+    //Key codes
+    final char SURROUND_KEY = ' ';
+
     //Game
     Board board;
     boolean isGameInProgress;
@@ -67,6 +70,7 @@ public class GUI implements ActionListener
             "There's no shame in playing on Easy mode."
         };
     Random randMessage;
+    boolean isSurroundShown;
 
     //Debug
     String sampleLB = "Kevin: 06:31\nJeff: 03:19\nKaren: 12:25";
@@ -81,6 +85,7 @@ public class GUI implements ActionListener
         time = 0;
         timer = new Timer(1000, this);
         randMessage = new Random();
+        isSurroundShown = false;
 
         //Load images
         try
@@ -165,7 +170,12 @@ public class GUI implements ActionListener
         boardP.setMaximumSize(new Dimension(BOARD_PX, BOARD_PX));
         boardP.setBorder(new BevelBorder(BevelBorder.LOWERED));
         boardP.setBackground(MyColors.HIDDEN_COLOR);
+
+        //Add interactivity
         boardP.addMouseListener(boardP);
+        ToggleSurroundAction toggleSurround = new ToggleSurroundAction();
+        boardP.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(SURROUND_KEY), "showSurrounding");
+        boardP.getActionMap().put("showSurrounding", toggleSurround);
 
         //Set up right panel with leaderboard and game info
         JPanel rightP = new JPanel();
@@ -664,7 +674,7 @@ public class GUI implements ActionListener
             repaint();
         }
 
-        //Unused but required by interface
+        //Unused but required by interfaces
         public void mouseEntered(MouseEvent e)
         {
         }
@@ -679,6 +689,23 @@ public class GUI implements ActionListener
 
         public void mouseReleased(MouseEvent e)
         {
+        }
+    }
+
+    private class ToggleSurroundAction extends AbstractAction
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+            if(isSurroundShown)
+            {
+                System.out.println("hide");
+            }
+            else
+            {
+                System.out.println("show");
+            }
+            
+            isSurroundShown = !isSurroundShown;
         }
     }
 }
