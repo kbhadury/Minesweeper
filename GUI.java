@@ -36,6 +36,7 @@ public class GUI implements ActionListener
 
     //Images
     BufferedImage flagBI;
+    BufferedImage questionBI;
     BufferedImage badFlagBI;
     BufferedImage mineBI;
     BufferedImage donutBI;
@@ -85,6 +86,7 @@ public class GUI implements ActionListener
         try
         {
             flagBI = ImageIO.read(new File("flag.png"));
+            questionBI = ImageIO.read(new File("question.png"));
             mineBI = ImageIO.read(new File("mine.png"));
             donutBI = ImageIO.read(new File("donut.png"));
             badFlagBI = ImageIO.read(new File("badFlag.png"));
@@ -304,7 +306,7 @@ public class GUI implements ActionListener
     {
         Mode mode;
         boolean doWrap;
-        
+
         if(diff == null)
         {
             String diffStr = promptDiff();
@@ -459,12 +461,12 @@ public class GUI implements ActionListener
     private String promptDiff()
     {
         Object[] options = {
-            "Easy (" + Difficulty.EASY.getSize() + "x" + Difficulty.EASY.getSize() + ", " + Difficulty.EASY.getMines() + " mines)",
-            "Medium (" + Difficulty.MEDIUM.getSize() + "x" + Difficulty.MEDIUM.getSize() + ", " + Difficulty.MEDIUM.getMines() + " mines)",
-            "Hard (" + Difficulty.HARD.getSize() + "x" + Difficulty.HARD.getSize() + ", " + Difficulty.HARD.getMines() + " mines)",
-            "Extreme (" + Difficulty.EXTREME.getSize() + "x" + Difficulty.EXTREME.getSize() + ", " + Difficulty.EXTREME.getMines() + " mines)"
-        };
-        
+                "Easy (" + Difficulty.EASY.getSize() + "x" + Difficulty.EASY.getSize() + ", " + Difficulty.EASY.getMines() + " mines)",
+                "Medium (" + Difficulty.MEDIUM.getSize() + "x" + Difficulty.MEDIUM.getSize() + ", " + Difficulty.MEDIUM.getMines() + " mines)",
+                "Hard (" + Difficulty.HARD.getSize() + "x" + Difficulty.HARD.getSize() + ", " + Difficulty.HARD.getMines() + " mines)",
+                "Extreme (" + Difficulty.EXTREME.getSize() + "x" + Difficulty.EXTREME.getSize() + ", " + Difficulty.EXTREME.getMines() + " mines)"
+            };
+
         String result = (String)JOptionPane.showInputDialog(frame, "Choose your difficulty", "Difficulty", JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
         if(result == null)
         {
@@ -587,6 +589,10 @@ public class GUI implements ActionListener
                 case BAD_FLAG:
                 g2d.drawImage(badFlagBI, x, y, tileSize, tileSize, MyColors.HIDDEN_COLOR, null);
                 break;
+
+                case QUESTION:
+                g2d.drawImage(questionBI, x, y, tileSize, tileSize, MyColors.HIDDEN_COLOR, null);
+                break;
             }
         }
 
@@ -633,17 +639,25 @@ public class GUI implements ActionListener
                     doGameOver(true);
                 }
             }
-            else if(e.getButton() == MouseEvent.BUTTON3 && board.getUpperTile(row, col) == BoardTile.HIDDEN) //left click on hidden
+            else if(e.getButton() == MouseEvent.BUTTON3) //left click
             {
-                board.setUpperTile(BoardTile.FLAGGED, row, col);
-                ++numFlags;
-                flagsL.setText("" + numFlags);
-            }
-            else if(e.getButton() == MouseEvent.BUTTON3 && board.getUpperTile(row, col) == BoardTile.FLAGGED) //left click on flag
-            {
-                board.setUpperTile(BoardTile.HIDDEN, row, col);
-                --numFlags;
-                flagsL.setText("" + numFlags);
+                BoardTile tile = board.getUpperTile(row, col);
+                if(tile == BoardTile.HIDDEN)
+                {
+                    board.setUpperTile(BoardTile.FLAGGED, row, col);
+                    ++numFlags;
+                    flagsL.setText("" + numFlags);
+                }
+                else if(tile == BoardTile.FLAGGED)
+                {
+                    board.setUpperTile(BoardTile.QUESTION, row, col);
+                    --numFlags;
+                    flagsL.setText("" + numFlags);
+                }
+                else if(tile == BoardTile.QUESTION)
+                {
+                    board.setUpperTile(BoardTile.HIDDEN, row, col);
+                }
             }
 
             //Update board

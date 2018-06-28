@@ -6,7 +6,8 @@ public enum BoardTile
     MINE(-3),
     FLAGGED(-4),
     BAD_FLAG(-5),
-    HIT_MINE(-6);
+    HIT_MINE(-6),
+    QUESTION(-7);
     
     private final int value;
     private BoardTile(int value)
