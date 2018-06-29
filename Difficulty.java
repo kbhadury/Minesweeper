@@ -1,6 +1,6 @@
 public enum Difficulty
 {
-    EASY(8, 10),
+    EASY(8, 8),
     MEDIUM(12, 15),
     HARD(15, 25),
     EXTREME(20, 40);

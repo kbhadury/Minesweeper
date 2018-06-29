@@ -537,6 +537,17 @@ public class GUI implements ActionListener
         int tileSize;
         Graphics2D g2d;
 
+        private BoardPanel()
+        {
+            super();
+            setFocusable(true);
+        }
+
+        public int getTileSize()
+        {
+            return tileSize;
+        }
+
         @Override
         public void paintComponent(Graphics g)
         {
@@ -545,7 +556,7 @@ public class GUI implements ActionListener
             g2d = (Graphics2D)g;
             g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 32));
             int size = board.getDiff().getSize();
-            tileSize = BOARD_PX / size; 
+            tileSize = BOARD_PX / size;
 
             //Draw tiles
             for(int row = 0; row < size; ++row)
@@ -593,7 +604,7 @@ public class GUI implements ActionListener
                 break;
 
                 case HIT_MINE:
-                g2d.drawImage(mineBI, x, y, tileSize, tileSize, MyColors.HIT_MINE, null);
+                g2d.drawImage(mineBI, x, y, tileSize, tileSize, MyColors.HIT_MINE_COLOR, null);
                 break;
 
                 case BAD_FLAG:
@@ -604,6 +615,12 @@ public class GUI implements ActionListener
                 g2d.drawImage(questionBI, x, y, tileSize, tileSize, MyColors.HIDDEN_COLOR, null);
                 break;
             }
+
+            if(board.getOverlayInt(row, col) == 1)
+            {
+                g2d.setColor(MyColors.HIGHLIGHT_COLOR);
+                g2d.fillRect(x + 2, y + 2, tileSize - 4, tileSize - 4);
+            }
         }
 
         //Mouse click handler, only checks for left and right mouse buttons
@@ -613,6 +630,9 @@ public class GUI implements ActionListener
             {
                 return;
             }
+
+            //Get focus so keyboard input will work
+            requestFocusInWindow();
 
             //Get tile position
             int row = e.getY() / tileSize;
@@ -692,20 +712,32 @@ public class GUI implements ActionListener
         }
     }
 
+    //Private class to handle Action to toggle surround highlighting
     private class ToggleSurroundAction extends AbstractAction
     {
+        int curRow, curCol;
+
+        private ToggleSurroundAction()
+        {
+            super();
+            curRow = -1;
+            curCol = -1;
+        }
+
         public void actionPerformed(ActionEvent e)
         {
-            if(isSurroundShown)
+            if(isSurroundShown) //hide surround highlights
             {
-                System.out.println("hide");
+                board.setOverlayAt(0, curRow, curCol);
             }
-            else
+            else //show highlights
             {
-                System.out.println("show");
+                curRow = boardP.getMousePosition().y / boardP.getTileSize();
+                curCol = boardP.getMousePosition().x / boardP.getTileSize();
+                board.setOverlayAt(1, curRow, curCol);
             }
-            
             isSurroundShown = !isSurroundShown;
+            boardP.repaint();
         }
     }
 }
