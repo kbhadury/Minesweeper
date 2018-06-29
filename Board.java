@@ -3,17 +3,15 @@ import java.util.*;
 public class Board
 {
     Difficulty diff;
-    Mode mode;
     boolean doWrap;
     int[][] lowerLayer;
     BoardTile[][] upperLayer;
     int[][] overlayLayer;
 
     //Constructor
-    public Board(Difficulty diff, Mode mode, boolean doWrap)
+    public Board(Difficulty diff, boolean doWrap)
     {
         this.diff = diff;
-        this.mode = mode;
         this.doWrap = doWrap;
 
         generateEmptyField(); //filled after first click
@@ -23,11 +21,6 @@ public class Board
     public Difficulty getDiff()
     {
         return diff;
-    }
-
-    public Mode getMode()
-    {
-        return mode;
     }
 
     public boolean getWrap()
@@ -176,7 +169,7 @@ public class Board
         {
             for(int col = 0; col < size; ++col)
             {
-                if(lowerLayer[row][col] == BoardTile.MINE.getValue())
+                if(lowerLayer[row][col] == BoardTile.MINE.getValue() && upperLayer[row][col] != BoardTile.HIT_MINE)
                 {
                     upperLayer[row][col] = BoardTile.MINE;
                 }

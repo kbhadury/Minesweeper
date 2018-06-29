@@ -51,10 +51,14 @@ public class GUI implements ActionListener
 
     //Game
     Board board;
+    Mode mode;
+    BufferedImage mineSkinBI;
     boolean isGameInProgress;
     boolean isInputEnabled;
     int numFlags;
+    int numDonutsFound;
     int time;
+    int clicks;
     String[] gameOverTitles = {
             "Prognosis: negative",
             "I'll just step here...",
@@ -78,11 +82,15 @@ public class GUI implements ActionListener
     //Constructor
     public GUI()
     {
-        board = new Board(Difficulty.MEDIUM, Mode.CLASSIC, false); //init to Medium
+        //Init to medium classic game
+        board = new Board(Difficulty.MEDIUM, false);
+        mode = Mode.CLASSIC;
         isGameInProgress = false;
         isInputEnabled = true;
         numFlags = 0;
+        numDonutsFound = 0;
         time = 0;
+        clicks = 0;
         timer = new Timer(1000, this);
         randMessage = new Random();
         isSurroundShown = false;
@@ -107,6 +115,8 @@ public class GUI implements ActionListener
             System.err.println(ioEx.getMessage());
             System.exit(1);
         }
+
+        mineSkinBI = mineBI;
     }
 
     //Handles GUI initialization
@@ -314,7 +324,6 @@ public class GUI implements ActionListener
     //Returns false if the user doesn't specify all options
     private boolean promptOptionsAndInitBoard(Difficulty diff)
     {
-        Mode mode;
         boolean doWrap;
 
         if(diff == null)
@@ -338,10 +347,12 @@ public class GUI implements ActionListener
         else if(modePrompt == CLASSIC_OPTION)
         {
             mode = Mode.CLASSIC;
+            mineSkinBI = mineBI;
         }
         else
         {
             mode = Mode.DONUT;
+            mineSkinBI = donutBI;
         }
 
         int wrapPrompt = promptWrap();
@@ -354,7 +365,7 @@ public class GUI implements ActionListener
             doWrap = (wrapPrompt == JOptionPane.YES_OPTION);
         }
 
-        board = new Board(diff, mode, doWrap);
+        board = new Board(diff, doWrap);
         return true;
     }
 
@@ -364,13 +375,29 @@ public class GUI implements ActionListener
         //Reset stats
         numFlags = 0;
         time = 0;
-        flagsL.setText("0");
-        minesL.setText("" + board.getDiff().getMines());
-        timerL.setText("00:00");
+        clicks = 0;
+        if(mode == Mode.CLASSIC)
+        {
+            flagsL.setBorder(new TitledBorder("Flags placed"));
+            flagsL.setText("0");
+            minesL.setBorder(new TitledBorder("Mines hidden"));
+            minesL.setText("" + board.getDiff().getMines());
+            timerL.setBorder(new TitledBorder("Time"));
+            timerL.setText("00:00");
+        }
+        else if(mode == Mode.DONUT)
+        {
+            flagsL.setBorder(new TitledBorder("Calories consumed"));
+            flagsL.setText("0");
+            minesL.setBorder(new TitledBorder("Donuts hidden"));
+            minesL.setText("" + board.getDiff().getMines());
+            timerL.setBorder(new TitledBorder("Clicks"));
+            timerL.setText("0");
+        }
 
         JTabbedPane currTP = null;
 
-        switch(board.getMode())
+        switch(mode)
         {
             case CLASSIC:
             leaderboardModeTP.setSelectedIndex(0);
@@ -408,6 +435,7 @@ public class GUI implements ActionListener
     }
 
     //Ends the game based on whether it was a win or loss
+    //It is not possible to lose in DONUT mode
     private void doGameOver(boolean isWin)
     {
         //Stop the game
@@ -424,9 +452,12 @@ public class GUI implements ActionListener
             boardP.repaint();
             choice = promptRestartOnLoss();
         }
-        else
+        else //only possible branch in DONUT mode
         {
-            board.revealMines();
+            if(mode == Mode.CLASSIC)
+            {
+                board.revealMines();
+            }
             boardP.repaint();
             choice = promptRestartOnWin();
         }
@@ -459,11 +490,21 @@ public class GUI implements ActionListener
 
     private boolean checkForWin()
     {
-        int size = board.getDiff().getSize();
-        int numSpaces = size*size;
-        int numMines = board.getDiff().getMines();
-        int numClearSpaces = board.getNumClearSpaces();
-        return (numSpaces - numMines == numClearSpaces);
+        if(mode == Mode.CLASSIC)
+        {
+            int size = board.getDiff().getSize();
+            int numSpaces = size*size;
+            int numMines = board.getDiff().getMines();
+            int numClearSpaces = board.getNumClearSpaces();
+            return (numSpaces - numMines == numClearSpaces);
+        }
+        else if(mode == Mode.DONUT)
+        {
+            int numMines = board.getDiff().getMines();
+            return (numDonutsFound == numMines);
+        }
+
+        return false; //this should never happen
     }
 
     /****Start dialog box routines*****/
@@ -527,7 +568,16 @@ public class GUI implements ActionListener
     private int promptRestartOnWin()
     {
         Object[] options = {"Yeah, let's do it!", "No, I quit"};
-        return JOptionPane.showOptionDialog(frame, "Consider those mines swept!  Play again?", "Woo hoo!", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
+        String message = null;
+        if(mode == Mode.CLASSIC)
+        {
+            message = "Consider those mines swept!" + "\nTime: " + timerL.getText();
+        }
+        else if(mode == Mode.DONUT)
+        {
+            message = "Deeeeeee-licious!" + "\nClicks: " + timerL.getText();
+        }
+        return JOptionPane.showOptionDialog(frame, message + "\n\nPlay again?", "Woo hoo!", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
     }
     /*****End dialog box routines*****/
 
@@ -600,7 +650,7 @@ public class GUI implements ActionListener
                 break;
 
                 case MINE:
-                g2d.drawImage(mineBI, x, y, tileSize, tileSize, MyColors.HIDDEN_COLOR, null);
+                g2d.drawImage(mineSkinBI, x, y, tileSize, tileSize, MyColors.HIDDEN_COLOR, null);
                 break;
 
                 case HIT_MINE:
@@ -631,9 +681,6 @@ public class GUI implements ActionListener
                 return;
             }
 
-            //Get focus so keyboard input will work
-            requestFocusInWindow();
-
             //Get tile position
             int row = e.getY() / tileSize;
             int col = e.getX() / tileSize;
@@ -643,20 +690,35 @@ public class GUI implements ActionListener
             {
                 isGameInProgress = true;
                 board.addMinesAndAvoid(row, col);
-                timer.start();
+                if(mode == Mode.CLASSIC)
+                {
+                    timer.start();
+                }
             }
 
             //Update tile
             if(e.getButton() == MouseEvent.BUTTON1 && board.getUpperTile(row, col) != BoardTile.FLAGGED) //right click
             {
-                int tile = board.getLowerInt(row, col);
-                if(tile == BoardTile.MINE.getValue())
+                //Perform corresponding action
+                int lowerInt = board.getLowerInt(row, col);
+                BoardTile upperTile = board.getUpperTile(row, col);
+                
+                if(lowerInt == BoardTile.MINE.getValue())
                 {
-                    board.setUpperTile(BoardTile.HIT_MINE, row, col);
-                    doGameOver(false);
-                    return;
+                    if(mode == Mode.CLASSIC)
+                    {
+                        board.setUpperTile(BoardTile.HIT_MINE, row, col);
+                        doGameOver(false);
+                        return;
+                    }
+                    else if(mode == Mode.DONUT && upperTile == BoardTile.HIDDEN) //avoid counting duplicates
+                    {
+                        board.setUpperTile(BoardTile.MINE, row, col);
+                        ++numDonutsFound;
+                        flagsL.setText("" + numDonutsFound * 100); //100 calories per donut!
+                    }
                 }
-                else if(tile == 0)
+                else if(lowerInt == 0)
                 {
                     board.recursivelyClear(row, col);
                 }
@@ -664,6 +726,15 @@ public class GUI implements ActionListener
                 {
                     board.setUpperTile(BoardTile.CLEARED, row, col);
                 }
+
+                //Only count clicks on hidden tiles
+                if(mode == Mode.DONUT && upperTile == BoardTile.HIDDEN)
+                {
+                    ++clicks;
+                    timerL.setText("" + clicks);
+                }
+
+                //Check for win on click
                 if(checkForWin())
                 {
                     doGameOver(true);
@@ -675,14 +746,20 @@ public class GUI implements ActionListener
                 if(tile == BoardTile.HIDDEN)
                 {
                     board.setUpperTile(BoardTile.FLAGGED, row, col);
-                    ++numFlags;
-                    flagsL.setText("" + numFlags);
+                    if(mode == Mode.CLASSIC)
+                    {
+                        ++numFlags;
+                        flagsL.setText("" + numFlags);
+                    }
                 }
                 else if(tile == BoardTile.FLAGGED)
                 {
                     board.setUpperTile(BoardTile.QUESTION, row, col);
-                    --numFlags;
-                    flagsL.setText("" + numFlags);
+                    if(mode == Mode.CLASSIC)
+                    {
+                        --numFlags;
+                        flagsL.setText("" + numFlags);
+                    }
                 }
                 else if(tile == BoardTile.QUESTION)
                 {
