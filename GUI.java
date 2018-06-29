@@ -376,6 +376,7 @@ public class GUI implements ActionListener
         numFlags = 0;
         time = 0;
         clicks = 0;
+        numDonutsFound = 0;
         if(mode == Mode.CLASSIC)
         {
             flagsL.setBorder(new TitledBorder("Flags placed"));
@@ -702,7 +703,7 @@ public class GUI implements ActionListener
                 //Perform corresponding action
                 int lowerInt = board.getLowerInt(row, col);
                 BoardTile upperTile = board.getUpperTile(row, col);
-                
+
                 if(lowerInt == BoardTile.MINE.getValue())
                 {
                     if(mode == Mode.CLASSIC)

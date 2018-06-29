@@ -228,7 +228,7 @@ public class Board
                     testCol = (testCol + diff.getSize()) % diff.getSize();
                 }
 
-                if(isInBounds(testRow, testCol))
+                if(isInBounds(testRow, testCol) && upperLayer[testRow][testCol] == BoardTile.HIDDEN)
                 {
                     overlayLayer[testRow][testCol] = val;
                 }
