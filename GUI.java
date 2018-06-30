@@ -77,7 +77,7 @@ public class GUI implements ActionListener
     boolean isSurroundShown;
 
     //Debug
-    String sampleLB = "Kevin: 06:31\nJeff: 03:19\nKaren: 12:25";
+    String sampleLB = "No wrapping\nKevin: 06:31\nJeff: 03:19\nKaren: 12:25\nWrapping\nAlfred\nBob\nCarol";
 
     //Constructor
     public GUI()
@@ -210,7 +210,7 @@ public class GUI implements ActionListener
         leaderboardDonutTP.addTab("Hard", new JTextArea(sampleLB));
         leaderboardDonutTP.addTab("Extreme", new JTextArea(sampleLB));
         leaderboardModeTP = new JTabbedPane();
-        leaderboardModeTP.setPreferredSize(new Dimension(260, 200));
+        leaderboardModeTP.setPreferredSize(new Dimension(260, 240));
         leaderboardModeTP.addTab("Classic", leaderboardClassicTP);
         leaderboardModeTP.addTab("Donut", leaderboardDonutTP);
 
@@ -810,8 +810,13 @@ public class GUI implements ActionListener
             }
             else //show highlights
             {
-                curRow = boardP.getMousePosition().y / boardP.getTileSize();
-                curCol = boardP.getMousePosition().x / boardP.getTileSize();
+                Point mousePt = boardP.getMousePosition();
+                if(mousePt == null) //mouse not over board
+                {
+                    return;
+                }
+                curRow = mousePt.y / boardP.getTileSize();
+                curCol = mousePt.x / boardP.getTileSize();
                 board.setOverlayAt(1, curRow, curCol);
             }
             isSurroundShown = !isSurroundShown;
