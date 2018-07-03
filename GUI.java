@@ -77,7 +77,7 @@ public class GUI implements ActionListener
     boolean isSurroundShown;
 
     //Debug
-    String sampleLB = "No wrapping\nKevin: 06:31\nJeff: 03:19\nKaren: 12:25\nWrapping\nAlfred\nBob\nCarol";
+    String sampleLB = "***No wrapping***\nNardo Polo: 99:59\nJeff: 03:19\nKaren: 12:25\n***Wrapping***\nAlfred\nBob\nCarol";
 
     //Constructor
     public GUI()
@@ -197,7 +197,7 @@ public class GUI implements ActionListener
         JPanel leaderboardP = new JPanel();
         leaderboardP.setBackground(MyColors.BG_COLOR);
 
-        leaderboardL = new JLabel("Leaderboard");
+        leaderboardL = new JLabel("High scores");
 
         leaderboardClassicTP = new JTabbedPane();
         leaderboardClassicTP.addTab("Easy", new JTextArea(sampleLB));
@@ -316,6 +316,10 @@ public class GUI implements ActionListener
         else if(e.getSource() == quitMI)
         {
             frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+        }
+        else if(e.getSource() == aboutMI)
+        {
+            showAboutDialog();
         }
     }
 
@@ -579,6 +583,12 @@ public class GUI implements ActionListener
             message = "Deeeeeee-licious!" + "\nClicks: " + timerL.getText();
         }
         return JOptionPane.showOptionDialog(frame, message + "\n\nPlay again?", "Woo hoo!", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
+    }
+    
+    private void showAboutDialog()
+    {
+        JLabel text = new JLabel("<html><body><p>Made by Kiran Bhadury");
+        JOptionPane.showMessageDialog(frame, text);
     }
     /*****End dialog box routines*****/
 
