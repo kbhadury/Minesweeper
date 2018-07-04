@@ -30,6 +30,7 @@ public class GUI implements ActionListener
     JTabbedPane leaderboardModeTP;
     JTabbedPane leaderboardClassicTP;
     JTabbedPane leaderboardDonutTP;
+    JTextArea[][] leaderboards;
     BoardPanel boardP;
     static final int BOARD_PX = 600;
     Timer timer;
@@ -75,9 +76,7 @@ public class GUI implements ActionListener
         };
     Random randMessage;
     boolean isSurroundShown;
-
-    //Debug
-    String sampleLB = "***No wrapping***\nNardo Polo: 99:59\nJeff: 03:19\nKaren: 12:25\n***Wrapping***\nAlfred\nBob\nCarol";
+    ScoreManager scoreManager;
 
     //Constructor
     public GUI()
@@ -86,7 +85,7 @@ public class GUI implements ActionListener
         board = new Board(Difficulty.MEDIUM, false);
         mode = Mode.CLASSIC;
         isGameInProgress = false;
-        isInputEnabled = true;
+        isInputEnabled = false;
         numFlags = 0;
         numDonutsFound = 0;
         time = 0;
@@ -94,6 +93,7 @@ public class GUI implements ActionListener
         timer = new Timer(1000, this);
         randMessage = new Random();
         isSurroundShown = false;
+        scoreManager = new ScoreManager();
 
         //Load images
         try
@@ -115,21 +115,31 @@ public class GUI implements ActionListener
             System.err.println(ioEx.getMessage());
             System.exit(1);
         }
-
         mineSkinBI = mineBI;
+
+        //Init leaderboard textareas
+        leaderboards = new JTextArea[ScoreManager.NUM_MODES][ScoreManager.NUM_DIFFS];
+        Font leaderboardFont = new Font(Font.MONOSPACED, Font.PLAIN, 16);
+        for(int mode = 0; mode < ScoreManager.NUM_MODES; ++mode)
+        {
+            for(int diff = 0; diff < ScoreManager.NUM_DIFFS; ++diff)
+            {
+                leaderboards[mode][diff] = new JTextArea();
+                leaderboards[mode][diff].setEditable(false);
+                leaderboards[mode][diff].setFont(leaderboardFont);
+            }
+        }
     }
 
     //Handles GUI initialization
     public void createGUI()
     {
-        //Set up fonts
+        //Set up default fonts
         Font labelFont = new Font(Font.SANS_SERIF, Font.PLAIN, 24);
         Font menuFont = new Font(Font.SANS_SERIF, Font.BOLD, 16);
-        Font leaderboardFont = new Font(Font.MONOSPACED, Font.PLAIN, 16);
         UIManager.put("Label.font", labelFont);
         UIManager.put("Menu.font", menuFont);
         UIManager.put("MenuItem.font", menuFont);
-        UIManager.put("TextArea.font", leaderboardFont);
         UIManager.put("TitledBorder.font", menuFont);
 
         //Set up frame
@@ -200,15 +210,15 @@ public class GUI implements ActionListener
         leaderboardL = new JLabel("High scores");
 
         leaderboardClassicTP = new JTabbedPane();
-        leaderboardClassicTP.addTab("Easy", new JTextArea(sampleLB));
-        leaderboardClassicTP.addTab("Medium", new JTextArea(sampleLB));
-        leaderboardClassicTP.addTab("Hard", new JTextArea(sampleLB));
-        leaderboardClassicTP.addTab("Extreme", new JTextArea(sampleLB));
+        leaderboardClassicTP.addTab("Easy", leaderboards[0][0]);
+        leaderboardClassicTP.addTab("Medium", leaderboards[0][1]);
+        leaderboardClassicTP.addTab("Hard", leaderboards[0][2]);
+        leaderboardClassicTP.addTab("Extreme", leaderboards[0][3]);
         leaderboardDonutTP = new JTabbedPane();
-        leaderboardDonutTP.addTab("Easy", new JTextArea(sampleLB));
-        leaderboardDonutTP.addTab("Medium", new JTextArea(sampleLB));
-        leaderboardDonutTP.addTab("Hard", new JTextArea(sampleLB));
-        leaderboardDonutTP.addTab("Extreme", new JTextArea(sampleLB));
+        leaderboardDonutTP.addTab("Easy", leaderboards[1][0]);
+        leaderboardDonutTP.addTab("Medium", leaderboards[1][1]);
+        leaderboardDonutTP.addTab("Hard", leaderboards[1][2]);
+        leaderboardDonutTP.addTab("Extreme", leaderboards[1][3]);
         leaderboardModeTP = new JTabbedPane();
         leaderboardModeTP.setPreferredSize(new Dimension(260, 240));
         leaderboardModeTP.addTab("Classic", leaderboardClassicTP);
@@ -253,7 +263,7 @@ public class GUI implements ActionListener
         if(e.getSource() == timer)
         {
             ++time;
-            timerL.setText(String.format("%02d", time/60) + ":" + String.format("%02d", time%60));
+            timerL.setText(String.format("%02d:%02d", time/60, time%60));
         }
         else if(e.getSource() == easyMI)
         {
@@ -398,6 +408,24 @@ public class GUI implements ActionListener
             minesL.setText("" + board.getDiff().getMines());
             timerL.setBorder(new TitledBorder("Clicks"));
             timerL.setText("0");
+        }
+
+        //Update leaderboard
+        Score[][][] scores = scoreManager.getScores();
+        for(int mode = 0; mode < ScoreManager.NUM_MODES; ++mode)
+        {
+            for(int diff = 0; diff < ScoreManager.NUM_DIFFS; ++diff)
+            {
+                String text = "***Wrapping OFF***\n" + 
+                    scores[mode][diff][0] + "\n" + 
+                    scores[mode][diff][1] + "\n" + 
+                    scores[mode][diff][2] + "\n" + 
+                    "***Wrapping ON!***\n" +
+                    scores[mode][diff][3] + "\n" + 
+                    scores[mode][diff][4] + "\n" + 
+                    scores[mode][diff][5];
+                leaderboards[mode][diff].setText(text);
+            }
         }
 
         JTabbedPane currTP = null;
@@ -584,7 +612,7 @@ public class GUI implements ActionListener
         }
         return JOptionPane.showOptionDialog(frame, message + "\n\nPlay again?", "Woo hoo!", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
     }
-    
+
     private void showAboutDialog()
     {
         JLabel text = new JLabel("<html><body><p>Made by Kiran Bhadury");
