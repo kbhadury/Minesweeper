@@ -74,6 +74,26 @@ public class GUI implements ActionListener
             "Sometimes you sweep the mine, and sometimes the mines sweeps you.",
             "There's no shame in playing on Easy mode."
         };
+    String[] classicWinTitles = {
+            "Nice and tidy",
+            "What a pro",
+            "Ready for a challenge?"
+        };
+    String[] classicWinMessages = {
+            "Consider those mines swept!",
+            "Wow, you made that look easy!",
+            "Now do it on EXTREME mode WITH wrapping ;)"
+        };
+    String[] donutWinTitles = {
+            "Oof...",
+            "Yum!",
+            "Skwawk!"
+        };
+    String[] donutWinMessages = {
+            "So... full... I think I need to lie down...",
+            "Deeeeeee-licious!",
+            "Miiiighty tasty!"
+        };
     Random randMessage;
     boolean isSurroundShown;
     ScoreManager scoreManager;
@@ -194,8 +214,8 @@ public class GUI implements ActionListener
         //Add interactivity
         boardP.addMouseListener(boardP);
         ToggleSurroundAction toggleSurround = new ToggleSurroundAction();
-        boardP.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(SURROUND_KEY), "showSurrounding");
-        boardP.getActionMap().put("showSurrounding", toggleSurround);
+        boardP.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(SURROUND_KEY), "toggleSurrounding");
+        boardP.getActionMap().put("toggleSurrounding", toggleSurround);
 
         //Set up right panel with leaderboard and game info
         JPanel rightP = new JPanel();
@@ -602,15 +622,20 @@ public class GUI implements ActionListener
     {
         Object[] options = {"Yeah, let's do it!", "No, I quit"};
         String message = null;
+        String title = null;
         if(mode == Mode.CLASSIC)
         {
-            message = "Consider those mines swept!" + "\nTime: " + timerL.getText();
+            int index = randMessage.nextInt(classicWinMessages.length);
+            title = classicWinTitles[index];
+            message = classicWinMessages[index] + "\nTime: " + timerL.getText();
         }
         else if(mode == Mode.DONUT)
         {
-            message = "Deeeeeee-licious!" + "\nClicks: " + timerL.getText();
+            int index = randMessage.nextInt(donutWinMessages.length);
+            title = donutWinTitles[index];
+            message = donutWinMessages[index] + "\nClicks: " + timerL.getText();;
         }
-        return JOptionPane.showOptionDialog(frame, message + "\n\nPlay again?", "Woo hoo!", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
+        return JOptionPane.showOptionDialog(frame, message + "\n\nPlay again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
     }
 
     private void showAboutDialog()
@@ -719,6 +744,9 @@ public class GUI implements ActionListener
             {
                 return;
             }
+            
+            //Request focus
+            boardP.requestFocus();
 
             //Get tile position
             int row = e.getY() / tileSize;

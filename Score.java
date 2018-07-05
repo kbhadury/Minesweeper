@@ -22,7 +22,7 @@ public class Score
         }
         else
         {
-            return String.format("%-10s: %d", name, value);            
+            return String.format("%-10s : %d", name, value);            
         }
     }
 
