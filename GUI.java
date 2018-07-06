@@ -343,7 +343,7 @@ public class GUI implements ActionListener
                 startNewGame();
             }
         }
-        else if(e.getSource() == quitMI)
+        else if(e.getSource() == quitMI && confirmAction("Are you sure you want to quit?", "Really quit?"))
         {
             frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
         }
@@ -432,6 +432,12 @@ public class GUI implements ActionListener
 
         //Update leaderboard
         Score[][][] scores = scoreManager.getScores();
+        if(scores == null)
+        {
+            showError("Fatal: the file 'scores.dat' is missing or corrupted.");
+            return;
+        }
+        
         for(int mode = 0; mode < ScoreManager.NUM_MODES; ++mode)
         {
             for(int diff = 0; diff < ScoreManager.NUM_DIFFS; ++diff)
@@ -744,7 +750,7 @@ public class GUI implements ActionListener
             {
                 return;
             }
-            
+
             //Request focus
             boardP.requestFocus();
 
