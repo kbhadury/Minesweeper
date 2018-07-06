@@ -97,6 +97,7 @@ public class GUI implements ActionListener
     Random randMessage;
     boolean isSurroundShown;
     ScoreManager scoreManager;
+    Score[][][] scores;
 
     //Constructor
     public GUI()
@@ -114,6 +115,7 @@ public class GUI implements ActionListener
         randMessage = new Random();
         isSurroundShown = false;
         scoreManager = new ScoreManager();
+        scores = null;
 
         //Load images
         try
@@ -431,13 +433,13 @@ public class GUI implements ActionListener
         }
 
         //Update leaderboard
-        Score[][][] scores = scoreManager.getScores();
+        scores = scoreManager.getScores();
         if(scores == null)
         {
             showError("Fatal: the file 'scores.dat' is missing or corrupted.");
             return;
         }
-        
+
         for(int mode = 0; mode < ScoreManager.NUM_MODES; ++mode)
         {
             for(int diff = 0; diff < ScoreManager.NUM_DIFFS; ++diff)
@@ -453,40 +455,10 @@ public class GUI implements ActionListener
                 leaderboards[mode][diff].setText(text);
             }
         }
-
-        JTabbedPane currTP = null;
-
-        switch(mode)
-        {
-            case CLASSIC:
-            leaderboardModeTP.setSelectedIndex(0);
-            currTP = leaderboardClassicTP;
-            break;
-
-            case DONUT:
-            leaderboardModeTP.setSelectedIndex(1);
-            currTP = leaderboardDonutTP;
-            break;
-        }
-
-        switch(board.getDiff())
-        {
-            case EASY:
-            currTP.setSelectedIndex(0);
-            break;
-
-            case MEDIUM:
-            currTP.setSelectedIndex(1);
-            break;
-
-            case HARD:
-            currTP.setSelectedIndex(2);
-            break;
-
-            case EXTREME:
-            currTP.setSelectedIndex(3);
-            break;
-        }
+        
+        leaderboardModeTP.setSelectedIndex(mode.getIndex());
+        JTabbedPane currTP = (JTabbedPane)(leaderboardModeTP.getComponentAt(mode.getIndex()));
+        currTP.setSelectedIndex(board.getDiff().getIndex());
 
         //Repaint board and enable play
         boardP.repaint();
@@ -502,9 +474,12 @@ public class GUI implements ActionListener
         isGameInProgress = false;
         timer.stop();
 
+        //Update timer display in case timer fired
+        timerL.setText(String.format("%02d:%02d", time/60, time%60));
+
         //Perform corresponding action
         int choice;
-        if(!isWin)
+        if(!isWin) //loss
         {
             checkForBadFlags();
             board.revealMines();
