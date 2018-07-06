@@ -97,7 +97,6 @@ public class GUI implements ActionListener
     Random randMessage;
     boolean isSurroundShown;
     ScoreManager scoreManager;
-    Score[][][] scores;
 
     //Constructor
     public GUI()
@@ -115,7 +114,6 @@ public class GUI implements ActionListener
         randMessage = new Random();
         isSurroundShown = false;
         scoreManager = new ScoreManager();
-        scores = null;
 
         //Load images
         try
@@ -146,7 +144,7 @@ public class GUI implements ActionListener
         {
             for(int diff = 0; diff < ScoreManager.NUM_DIFFS; ++diff)
             {
-                leaderboards[mode][diff] = new JTextArea();
+                leaderboards[mode][diff] = new JTextArea(8, 25);
                 leaderboards[mode][diff].setEditable(false);
                 leaderboards[mode][diff].setFont(leaderboardFont);
             }
@@ -355,7 +353,7 @@ public class GUI implements ActionListener
         }
     }
 
-    /*****Start game routines*****/
+    /*****Game management routines*****/
     //Gets mode and wrap options and calls board constructor
     //Returns false if the user doesn't specify all options
     private boolean promptOptionsAndInitBoard(Difficulty diff)
@@ -433,11 +431,10 @@ public class GUI implements ActionListener
         }
 
         //Update leaderboard
-        scores = scoreManager.getScores();
-        if(scores == null)
+        if(scoreManager.loadScores() == -1)
         {
             showError("Fatal: the file 'scores.dat' is missing or corrupted.");
-            return;
+            System.exit(1);
         }
 
         for(int mode = 0; mode < ScoreManager.NUM_MODES; ++mode)
@@ -445,17 +442,17 @@ public class GUI implements ActionListener
             for(int diff = 0; diff < ScoreManager.NUM_DIFFS; ++diff)
             {
                 String text = "***Wrapping OFF***\n" + 
-                    scores[mode][diff][0] + "\n" + 
-                    scores[mode][diff][1] + "\n" + 
-                    scores[mode][diff][2] + "\n" + 
+                    scoreManager.getScore(mode, diff, ScoreManager.NOWRAP_INDEX, 0) + "\n" + 
+                    scoreManager.getScore(mode, diff, ScoreManager.NOWRAP_INDEX, 1) + "\n" + 
+                    scoreManager.getScore(mode, diff, ScoreManager.NOWRAP_INDEX, 2) + "\n" + 
                     "***Wrapping ON!***\n" +
-                    scores[mode][diff][3] + "\n" + 
-                    scores[mode][diff][4] + "\n" + 
-                    scores[mode][diff][5];
+                    scoreManager.getScore(mode, diff, ScoreManager.WRAP_INDEX, 0) + "\n" + 
+                    scoreManager.getScore(mode, diff, ScoreManager.WRAP_INDEX, 1) + "\n" + 
+                    scoreManager.getScore(mode, diff, ScoreManager.WRAP_INDEX, 2);
                 leaderboards[mode][diff].setText(text);
             }
         }
-        
+
         leaderboardModeTP.setSelectedIndex(mode.getIndex());
         JTabbedPane currTP = (JTabbedPane)(leaderboardModeTP.getComponentAt(mode.getIndex()));
         currTP.setSelectedIndex(board.getDiff().getIndex());
@@ -486,13 +483,38 @@ public class GUI implements ActionListener
             boardP.repaint();
             choice = promptRestartOnLoss();
         }
-        else //only possible branch in DONUT mode
+        else //win (only possible branch in DONUT mode)
         {
+            int scoreValue = 99999; //just to make the compiler happy
+            boolean scoreIsTime = false;
+
+            //Reveal all mines
             if(mode == Mode.CLASSIC)
             {
                 board.revealMines();
+                scoreValue = time;
+                scoreIsTime = true;
+            }
+            else if(mode == Mode.DONUT)
+            {
+                scoreValue = clicks;
+                scoreIsTime = false;
             }
             boardP.repaint();
+
+            //Check for high score and update leaderboard if needed
+            int wrapIndex = board.getWrap() ? ScoreManager.WRAP_INDEX : ScoreManager.NOWRAP_INDEX;
+            if(scoreManager.isHighScoreInArray(scoreValue, mode.getIndex(), board.getDiff().getIndex(), wrapIndex))
+            {
+                String scoreName = promptName();
+                scoreManager.insertScoreInArray(new Score(scoreName, scoreValue, scoreIsTime), mode.getIndex(), board.getDiff().getIndex(), wrapIndex);
+                if(scoreManager.writeScores() == -1)
+                {
+                    showError("Fatal: could not write to 'scores.dat'");
+                    System.exit(1);
+                }
+            }
+
             choice = promptRestartOnWin();
         }
 
@@ -507,6 +529,7 @@ public class GUI implements ActionListener
         }
     }
 
+    //Check for misplaced flags and highlight them
     private void checkForBadFlags()
     {
         int size = board.getDiff().getSize();
@@ -522,6 +545,7 @@ public class GUI implements ActionListener
         }
     }
 
+    //Check to see if the board has been cleared correctly
     private boolean checkForWin()
     {
         if(mode == Mode.CLASSIC)
@@ -539,6 +563,37 @@ public class GUI implements ActionListener
         }
 
         return false; //this should never happen
+    }
+
+    //Checks to see if the winner got a new high score
+    //If so, returns index where score should be inserted (0 = new top score)
+    //Returns -1 if user did not get a high score
+    private int checkForHighScore()
+    {
+        int score = 99999; //this is a pretty bad score
+        if(mode == Mode.CLASSIC)
+        {
+            score = time;
+        } else if(mode == Mode.DONUT)
+        {
+            score = clicks;
+        }
+
+        //Figure out where to insert the new score
+        int insertAt = 2;
+        //         while(insertAt >= 0 && scores[mode.getIndex()][board.getDiff().getIndex()][insertAt].getValue() > score)
+        //         {
+        //             --insertAt;
+        //         }
+
+        if(insertAt == 2) //loop never ran, no high score
+        {
+            return -1;
+        }
+        else //the loop takes us past the insert point, so add 1
+        {
+            return (insertAt + 1);
+        }
     }
 
     /****Start dialog box routines*****/
@@ -590,6 +645,7 @@ public class GUI implements ActionListener
         JOptionPane.showMessageDialog(frame, message, "Error!", JOptionPane.ERROR_MESSAGE);
     }
 
+    //Ask if the user wants to play again after losing
     private int promptRestartOnLoss()
     {
         int index = randMessage.nextInt(gameOverMessages.length);
@@ -599,6 +655,7 @@ public class GUI implements ActionListener
         return JOptionPane.showOptionDialog(frame, "<html><body><p style='width: 200px;'>"+ message +"\n\nTry again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, options, null);
     }
 
+    //Show message appropriate to mode and ask if user wants to play again
     private int promptRestartOnWin()
     {
         Object[] options = {"Yeah, let's do it!", "No, I quit"};
@@ -617,6 +674,22 @@ public class GUI implements ActionListener
             message = donutWinMessages[index] + "\nClicks: " + timerL.getText();;
         }
         return JOptionPane.showOptionDialog(frame, message + "\n\nPlay again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
+    }
+
+    //Ask the user for their name
+    //Will repeat until a valid name is entered (10 or fewer chars)
+    private String promptName()
+    {
+        String name = null;
+        String message = "Congrats, you made the leaderboard!\n\nEnter your name (limit 10 characters):";
+
+        do
+        {
+            name = JOptionPane.showInputDialog(frame, message, "Who IS that minesweeper master??", JOptionPane.QUESTION_MESSAGE);
+        }
+        while(name == null || name.length() < 1 || name.length() > 10);
+
+        return name;
     }
 
     private void showAboutDialog()
@@ -819,7 +892,7 @@ public class GUI implements ActionListener
             repaint();
         }
 
-        //Unused but required by interfaces
+        //Unused but required by interface
         public void mouseEntered(MouseEvent e)
         {
         }
