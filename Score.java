@@ -25,6 +25,11 @@ public class Score
             return String.format("%-10s : %d", name, value);            
         }
     }
+    
+    public String getName()
+    {
+        return name;
+    }
 
     public int getValue()
     {

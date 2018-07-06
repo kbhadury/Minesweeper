@@ -471,9 +471,6 @@ public class GUI implements ActionListener
         isGameInProgress = false;
         timer.stop();
 
-        //Update timer display in case timer fired
-        timerL.setText(String.format("%02d:%02d", time/60, time%60));
-
         //Perform corresponding action
         int choice;
         if(!isWin) //loss
@@ -491,6 +488,8 @@ public class GUI implements ActionListener
             //Reveal all mines
             if(mode == Mode.CLASSIC)
             {
+                //Update timer display in case timer fired
+                timerL.setText(String.format("%02d:%02d", time/60, time%60));
                 board.revealMines();
                 scoreValue = time;
                 scoreIsTime = true;
@@ -563,37 +562,6 @@ public class GUI implements ActionListener
         }
 
         return false; //this should never happen
-    }
-
-    //Checks to see if the winner got a new high score
-    //If so, returns index where score should be inserted (0 = new top score)
-    //Returns -1 if user did not get a high score
-    private int checkForHighScore()
-    {
-        int score = 99999; //this is a pretty bad score
-        if(mode == Mode.CLASSIC)
-        {
-            score = time;
-        } else if(mode == Mode.DONUT)
-        {
-            score = clicks;
-        }
-
-        //Figure out where to insert the new score
-        int insertAt = 2;
-        //         while(insertAt >= 0 && scores[mode.getIndex()][board.getDiff().getIndex()][insertAt].getValue() > score)
-        //         {
-        //             --insertAt;
-        //         }
-
-        if(insertAt == 2) //loop never ran, no high score
-        {
-            return -1;
-        }
-        else //the loop takes us past the insert point, so add 1
-        {
-            return (insertAt + 1);
-        }
     }
 
     /****Start dialog box routines*****/
@@ -671,7 +639,7 @@ public class GUI implements ActionListener
         {
             int index = randMessage.nextInt(donutWinMessages.length);
             title = donutWinTitles[index];
-            message = donutWinMessages[index] + "\nClicks: " + timerL.getText();;
+            message = donutWinMessages[index] + "\nClicks: " + timerL.getText();
         }
         return JOptionPane.showOptionDialog(frame, message + "\n\nPlay again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
     }
