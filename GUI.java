@@ -441,15 +441,7 @@ public class GUI implements ActionListener
         {
             for(int diff = 0; diff < ScoreManager.NUM_DIFFS; ++diff)
             {
-                String text = "***Wrapping OFF***\n" + 
-                    scoreManager.getScore(mode, diff, ScoreManager.NOWRAP_INDEX, 0) + "\n" + 
-                    scoreManager.getScore(mode, diff, ScoreManager.NOWRAP_INDEX, 1) + "\n" + 
-                    scoreManager.getScore(mode, diff, ScoreManager.NOWRAP_INDEX, 2) + "\n" + 
-                    "***Wrapping ON!***\n" +
-                    scoreManager.getScore(mode, diff, ScoreManager.WRAP_INDEX, 0) + "\n" + 
-                    scoreManager.getScore(mode, diff, ScoreManager.WRAP_INDEX, 1) + "\n" + 
-                    scoreManager.getScore(mode, diff, ScoreManager.WRAP_INDEX, 2);
-                leaderboards[mode][diff].setText(text);
+                updateLeaderboardText(mode, diff);
             }
         }
 
@@ -512,6 +504,8 @@ public class GUI implements ActionListener
                     showError("Fatal: could not write to 'scores.dat'");
                     System.exit(1);
                 }
+                
+                updateLeaderboardText(mode.getIndex(), board.getDiff().getIndex());
             }
 
             choice = promptRestartOnWin();
@@ -526,6 +520,19 @@ public class GUI implements ActionListener
             if(promptOptionsAndInitBoard(null))
                 startNewGame();
         }
+    }
+
+    private void updateLeaderboardText(int mode, int diff)
+    {
+        String text = "***Wrapping OFF***\n" + 
+            scoreManager.getScore(mode, diff, ScoreManager.NOWRAP_INDEX, 0) + "\n" + 
+            scoreManager.getScore(mode, diff, ScoreManager.NOWRAP_INDEX, 1) + "\n" + 
+            scoreManager.getScore(mode, diff, ScoreManager.NOWRAP_INDEX, 2) + "\n" + 
+            "***Wrapping ON!***\n" +
+            scoreManager.getScore(mode, diff, ScoreManager.WRAP_INDEX, 0) + "\n" + 
+            scoreManager.getScore(mode, diff, ScoreManager.WRAP_INDEX, 1) + "\n" + 
+            scoreManager.getScore(mode, diff, ScoreManager.WRAP_INDEX, 2);
+        leaderboards[mode][diff].setText(text);
     }
 
     //Check for misplaced flags and highlight them
@@ -649,7 +656,16 @@ public class GUI implements ActionListener
     private String promptName()
     {
         String name = null;
-        String message = "Congrats, you made the leaderboard!\n\nEnter your name (limit 10 characters):";
+        String message = "Congrats, you made the leaderboard!\n";
+        if(mode == Mode.CLASSIC)
+        {
+            message += "Time: " +String.format("%02d:%02d", time/60, time%60);
+        }
+        else
+        {
+            message += "Clicks: " + clicks;
+        }
+        message += "\n\nEnter your name (limit 10 characters):";
 
         do
         {
