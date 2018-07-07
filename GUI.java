@@ -768,7 +768,7 @@ public class GUI implements ActionListener
                 break;
             }
 
-            if(board.getOverlayInt(row, col) == 1)
+            if(board.getOverlayInt(row, col) == true)
             {
                 g2d.setColor(MyColors.HIGHLIGHT_COLOR);
                 g2d.fillRect(x + 2, y + 2, tileSize - 4, tileSize - 4);
@@ -910,7 +910,7 @@ public class GUI implements ActionListener
         {
             if(isSurroundShown) //hide surround highlights
             {
-                board.setOverlayAt(0, curRow, curCol);
+                board.clearOverlayAt(curRow, curCol);
             }
             else //show highlights
             {
@@ -921,7 +921,7 @@ public class GUI implements ActionListener
                 }
                 curRow = mousePt.y / boardP.getTileSize();
                 curCol = mousePt.x / boardP.getTileSize();
-                board.setOverlayAt(1, curRow, curCol);
+                board.setOverlayAt(curRow, curCol);
             }
             isSurroundShown = !isSurroundShown;
             boardP.repaint();

@@ -6,7 +6,7 @@ public class Board
     boolean doWrap;
     int[][] lowerLayer;
     BoardTile[][] upperLayer;
-    int[][] overlayLayer;
+    boolean[][] overlayLayer;
 
     //Constructor
     public Board(Difficulty diff, boolean doWrap)
@@ -38,7 +38,7 @@ public class Board
         return upperLayer[row][col];
     }
 
-    public int getOverlayInt(int row, int col)
+    public boolean getOverlayInt(int row, int col)
     {
         return overlayLayer[row][col];
     }
@@ -76,7 +76,7 @@ public class Board
 
         lowerLayer = new int[size][size];
         upperLayer = new BoardTile[size][size];
-        overlayLayer = new int[size][size];
+        overlayLayer = new boolean[size][size];
 
         //Setup empty layers
         for(int row = 0; row < size; ++row)
@@ -85,7 +85,7 @@ public class Board
             {
                 upperLayer[row][col] = BoardTile.HIDDEN;
                 lowerLayer[row][col] = 0;
-                overlayLayer[row][col] = 0;
+                overlayLayer[row][col] = false;
             }
         }
     }
@@ -212,7 +212,7 @@ public class Board
         }
     }
 
-    public void setOverlayAt(int val, int row, int col)
+    public void setOverlayAt(int row, int col)
     {
         for(int r = -1; r <= 1; ++r)
         {
@@ -230,7 +230,31 @@ public class Board
 
                 if(isInBounds(testRow, testCol) && upperLayer[testRow][testCol] != BoardTile.CLEARED)
                 {
-                    overlayLayer[testRow][testCol] = val;
+                    overlayLayer[testRow][testCol] = true;
+                }
+            }
+        }
+    }
+    
+    public void clearOverlayAt(int row, int col)
+    {
+        for(int r = -1; r <= 1; ++r)
+        {
+            for(int c = -1; c <= 1; ++c)
+            {
+                int testRow = row + r;
+                int testCol = col + c;
+
+                //Compute wrapped position if needed
+                if(doWrap)
+                {
+                    testRow = (testRow + diff.getSize()) % diff.getSize();
+                    testCol = (testCol + diff.getSize()) % diff.getSize();
+                }
+
+                if(isInBounds(testRow, testCol))
+                {
+                    overlayLayer[testRow][testCol] = false;
                 }
             }
         }
