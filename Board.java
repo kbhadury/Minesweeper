@@ -178,8 +178,11 @@ public class Board
     }
 
     //Recursively clear empty spaces around the given space
-    public void recursivelyClear(int row, int col)
+    //Returns the number of flags removed by the clearing
+    public int recursivelyClear(int row, int col)
     {
+        int flagsRemoved = 0;
+
         //Compute wrapped position if needed
         if(doWrap)
         {
@@ -187,28 +190,35 @@ public class Board
             col = (col + diff.getSize()) % diff.getSize();
         }
 
+        //Out of bounds or already cleared
         if(!isInBounds(row, col) || upperLayer[row][col] == BoardTile.CLEARED)
         {
-            return;
+            return flagsRemoved;
         }
 
         //Clear regardless, since we want to reveal numbered spaces on edges of clear area
+        if(upperLayer[row][col] == BoardTile.FLAGGED)
+        {
+            ++flagsRemoved;
+        }
         upperLayer[row][col] = BoardTile.CLEARED;
 
+        //Now check if we should keep clearing spaces
         if(lowerLayer[row][col] != 0)
         {
-            return;
+            return flagsRemoved;
         }
         else
         {
-            recursivelyClear(row - 1, col - 1);
-            recursivelyClear(row - 1, col);
-            recursivelyClear(row - 1, col + 1);
-            recursivelyClear(row, col - 1);
-            recursivelyClear(row, col + 1);
-            recursivelyClear(row + 1, col - 1);
-            recursivelyClear(row + 1, col);
-            recursivelyClear(row + 1, col + 1);            
+            flagsRemoved += recursivelyClear(row - 1, col - 1);
+            flagsRemoved += recursivelyClear(row - 1, col);
+            flagsRemoved += recursivelyClear(row - 1, col + 1);
+            flagsRemoved += recursivelyClear(row, col - 1);
+            flagsRemoved += recursivelyClear(row, col + 1);
+            flagsRemoved += recursivelyClear(row + 1, col - 1);
+            flagsRemoved += recursivelyClear(row + 1, col);
+            flagsRemoved += recursivelyClear(row + 1, col + 1);            
+            return flagsRemoved;
         }
     }
 
@@ -235,7 +245,7 @@ public class Board
             }
         }
     }
-    
+
     public void clearOverlayAt(int row, int col)
     {
         for(int r = -1; r <= 1; ++r)

@@ -825,7 +825,12 @@ public class GUI implements ActionListener
                 }
                 else if(lowerInt == 0)
                 {
-                    board.recursivelyClear(row, col);
+                    int flagsRemoved = board.recursivelyClear(row, col);
+                    if(mode == Mode.CLASSIC)
+                    {
+                        numFlags -= flagsRemoved;
+                        flagsL.setText("" + numFlags);
+                    }
                 }
                 else //number
                 {
