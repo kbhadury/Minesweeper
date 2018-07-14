@@ -34,6 +34,8 @@ public class GUI implements ActionListener
     BoardPanel boardP;
     static final int BOARD_PX = 600;
     Timer timer;
+    JEditorPane helpContent;
+    JScrollPane helpScrollPane;
 
     //Images
     BufferedImage flagBI;
@@ -115,7 +117,7 @@ public class GUI implements ActionListener
         isSurroundShown = false;
         scoreManager = new ScoreManager();
 
-        //Load images
+        //Load images and help content
         try
         {
             flagBI = ImageIO.read(new File("flag.png"));
@@ -129,6 +131,10 @@ public class GUI implements ActionListener
             {
                 numbersBI[i] = ImageIO.read(new File(i + ".png"));
             }
+
+            helpContent = new JEditorPane("file:howTo.html");
+            helpContent.setPreferredSize(new Dimension(BOARD_PX, BOARD_PX));
+            helpScrollPane = new JScrollPane(helpContent, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         }
         catch(IOException ioEx)
         {
@@ -351,6 +357,10 @@ public class GUI implements ActionListener
         {
             showAboutDialog();
         }
+        else if(e.getSource() == helpMI)
+        {
+            showHelpDialog();
+        }
     }
 
     /*****Game management routines*****/
@@ -504,7 +514,7 @@ public class GUI implements ActionListener
                     showError("Fatal: could not write to 'scores.dat'");
                     System.exit(1);
                 }
-                
+
                 updateLeaderboardText(mode.getIndex(), board.getDiff().getIndex());
             }
 
@@ -678,8 +688,12 @@ public class GUI implements ActionListener
 
     private void showAboutDialog()
     {
-        JLabel text = new JLabel("<html><body><p>Made by Kiran Bhadury");
-        JOptionPane.showMessageDialog(frame, text);
+        JOptionPane.showMessageDialog(frame, "Made by Kiran Bhadury\ngithub.com/kbhadury", "About this game", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showHelpDialog()
+    {
+        JOptionPane.showMessageDialog(frame, helpScrollPane, "How To Play", JOptionPane.PLAIN_MESSAGE, null);
     }
     /*****End dialog box routines*****/
 
