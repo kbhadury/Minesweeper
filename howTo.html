@@ -18,8 +18,31 @@
 		</ul>
 		<h1>Classic mode</h1>
 		<p>
-		In Classic mode, some of the tiles have mines underneath them.  Your goal is to clear out all the "safe" tiles on the board without hitting any of the mines.  You can clear a tile by left-clicking on it to reveal the space underneath.  If you think a tile has a mine under it, you can right-click to place a flag on that tile.  Right-clicking twice replaces the flag with a "?", in case you aren't sure you want to flag it yet, and right-clicking a third time removes the "?".
+		In Classic mode, some of the tiles have mines underneath them.  Your goal is to clear out all the "safe" tiles on the board without hitting any of the mines.  You can clear a tile by left-clicking on it to reveal the space underneath.  If you think a tile has a mine under it, you can right-click to place a flag on that tile.  Right-clicking twice replaces the flag with a "?", in case you aren't sure you want to flag it yet, and right-clicking a third time returns you to a blank tile.
+		<br><br>
+		But how can you figure out where the mines are?  Some of the tiles have numbers hidden underneath them, and these numbers indicate how many mines immediately surround that tile horizontally, vertically, and diagonally.  In the picture below, we know that there are three mines hidden in the red box:
+		<br>
+		<img src="surrounding.PNG">
+		<br>
+		This isn't very helpful, so let's randomly clear a different tile on the board.  This is kind of risky, but at this point we have no choice.  Thankfully, we don't hit any mines and end up with this:
+		<br>
+		<img src="solve1orig.PNG">
+		<br>
+		Ah ha!  Now we can easiliy locate where two of the mines are hidden.  Take a look at the image below:
+		<br>
+		<img src="solve1.PNG">
+		<br>
+		Each of the indicated 1s has only one tile surrounding it, so that tile <i>must</i> be a mine!  Let's right-click on those tiles to flag them.  As we do so, notice that the 2 now has two flags surrounding it:
+		<br>
+		<img src="solve2.PNG">
+		<br>
+		The 2 tells us that there are two mines surrounding that tile, but we've already located them!  That means we can safely clear out the rest of the tiles surrounding the 2:
+		<br>
+		<img src="solve3.PNG">
+		<br>
+		Now we can move onto solving the rest of the puzzle.  Unfortunately in some cases it will be impossible to determine where a mine is, and you'll just have to guess, but most of the time you'll be able to use logic and figure out exactly where the mines are.  Placing flags isn't enough though - you'll need to clear all of the safe tiles on the board in order to win.
 		</p>
 		<h1>Donut mode</h1>
+		<h1>The wrapping option</h1>
 	</body>
 </html>
