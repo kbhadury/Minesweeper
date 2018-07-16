@@ -134,6 +134,7 @@ public class GUI implements ActionListener
 
             helpContent = new JEditorPane("file:howTo.html");
             helpContent.setPreferredSize(new Dimension(BOARD_PX, BOARD_PX));
+            helpContent.setEditable(false);
             helpScrollPane = new JScrollPane(helpContent, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         }
         catch(IOException ioEx)
