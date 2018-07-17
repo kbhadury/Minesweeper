@@ -22,23 +22,23 @@
 		<br><br>
 		But how can you figure out where the mines are?  Some of the tiles have numbers hidden underneath them, and these numbers indicate how many mines immediately surround that tile horizontally, vertically, and diagonally.  In the picture below, we know that there are three mines hidden in the red box:
 		<br>
-		<img src="surrounding.PNG">
+		<img src="images/surrounding.PNG">
 		<br>
 		This isn't very helpful, so let's randomly clear a different tile on the board.  This is kind of risky, but at this point we have no choice.  Thankfully, we don't hit any mines and end up with this:
 		<br>
-		<img src="solve1orig.PNG">
+		<img src="images/solve1orig.PNG">
 		<br>
 		Ah ha!  Now we can easiliy locate where two of the mines are hidden.  Take a look at the image below:
 		<br>
-		<img src="solve1.PNG">
+		<img src="images/solve1.PNG">
 		<br>
 		Each of the indicated 1s has only one tile surrounding it, so that tile <i>must</i> be a mine!  Let's right-click on those tiles to flag them.  As we do so, notice that the 2 now has two flags surrounding it:
 		<br>
-		<img src="solve2.PNG">
+		<img src="images/solve2.PNG">
 		<br>
 		The 2 tells us that there are two mines surrounding that tile, but we've already located them!  That means we can safely clear out the rest of the tiles surrounding the 2:
 		<br>
-		<img src="solve3.PNG">
+		<img src="images/solve3.PNG">
 		<br>
 		Now we can move onto solving the rest of the puzzle.  Unfortunately in some cases it will be impossible to determine where a mine is, and you'll just have to guess, but most of the time you'll be able to use logic and figure out exactly where the mines are.  Placing flags isn't enough though - you'll need to clear all of the safe tiles on the board in order to win.
 		</p>
@@ -50,9 +50,9 @@
 		<p>
 		This is where things get really nuts.  If you enable wrapping, the left edge of the board is connected to the right edge and the top edge is connected to the bottom edge.  This means that "surrounding" tiles can be on the other side of the board!  Here are some pictures with surrounding tiles highlighted:
 		<br>
-		<img src="wrapEdge.PNG">
+		<img src="images/wrapEdge.PNG">
 		<br>
-		<img src="wrapCorner.PNG">
+		<img src="images/wrapCorner.PNG">
 		<br>
 		<i>Hint: to highlight surrounding tiles like in the pictures, press the spacebar while hovering over a tile.</i>
 		</p>

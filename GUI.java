@@ -11,6 +11,7 @@ import java.util.Random;
 public class GUI implements ActionListener
 {
     //GUI objects
+    static final int BOARD_PX = 600;
     JFrame frame;
     JMenuBar menuBar;
     JMenu gameM;
@@ -32,10 +33,9 @@ public class GUI implements ActionListener
     JTabbedPane leaderboardDonutTP;
     JTextArea[][] leaderboards;
     BoardPanel boardP;
-    static final int BOARD_PX = 600;
-    Timer timer;
     JEditorPane helpContent;
     JScrollPane helpScrollPane;
+    Timer timer;
 
     //Images
     BufferedImage flagBI;
@@ -44,6 +44,10 @@ public class GUI implements ActionListener
     BufferedImage mineBI;
     BufferedImage donutBI;
     BufferedImage[] numbersBI;
+    ImageIcon duckIcon;
+    ImageIcon gameOverIcon;
+    ImageIcon gameWinIcon;
+    ImageIcon highScoreIcon;
 
     //Overwritten selection options
     final int CLASSIC_OPTION = JOptionPane.YES_OPTION;
@@ -62,6 +66,9 @@ public class GUI implements ActionListener
     int numDonutsFound;
     int time;
     int clicks;
+    Random randMessage;
+    boolean isSurroundShown;
+    ScoreManager scoreManager;
     String[] gameOverTitles = {
             "Prognosis: negative",
             "I'll just step here...",
@@ -96,9 +103,6 @@ public class GUI implements ActionListener
             "Deeeeeee-licious!",
             "Miiiighty tasty!"
         };
-    Random randMessage;
-    boolean isSurroundShown;
-    ScoreManager scoreManager;
 
     //Constructor
     public GUI()
@@ -120,17 +124,22 @@ public class GUI implements ActionListener
         //Load images and help content
         try
         {
-            flagBI = ImageIO.read(new File("flag.png"));
-            questionBI = ImageIO.read(new File("question.png"));
-            mineBI = ImageIO.read(new File("mine.png"));
-            donutBI = ImageIO.read(new File("donut.png"));
-            badFlagBI = ImageIO.read(new File("badFlag.png"));
+            flagBI = ImageIO.read(new File("images/flag.png"));
+            questionBI = ImageIO.read(new File("images/question.png"));
+            mineBI = ImageIO.read(new File("images/mine.png"));
+            donutBI = ImageIO.read(new File("images/donut.png"));
+            badFlagBI = ImageIO.read(new File("images/badFlag.png"));
 
             numbersBI = new BufferedImage[9];
             for(int i = 1; i <= 8; ++i)
             {
-                numbersBI[i] = ImageIO.read(new File(i + ".png"));
+                numbersBI[i] = ImageIO.read(new File("images/" + i + ".png"));
             }
+
+            duckIcon = new ImageIcon("images/Duck.jpg");
+            gameOverIcon = new ImageIcon("images/gameOver.png");
+            gameWinIcon = new ImageIcon("images/gameWin.png");
+            highScoreIcon = new ImageIcon("images/highScore.png");
 
             helpContent = new JEditorPane("file:howTo.html");
             helpContent.setPreferredSize(new Dimension(BOARD_PX, BOARD_PX));
@@ -638,7 +647,7 @@ public class GUI implements ActionListener
         String title = gameOverTitles[index];
         String message = gameOverMessages[index];
         Object[] options = {"Yeah, let's do it!", "No, I quit"};
-        return JOptionPane.showOptionDialog(frame, "<html><body><p style='width: 200px;'>"+ message +"\n\nTry again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, options, null);
+        return JOptionPane.showOptionDialog(frame, "<html><body><p style='width: 200px;'>"+ message +"\n\nTry again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, gameOverIcon, options, null);
     }
 
     //Show message appropriate to mode and ask if user wants to play again
@@ -659,7 +668,7 @@ public class GUI implements ActionListener
             title = donutWinTitles[index];
             message = donutWinMessages[index] + "\nClicks: " + timerL.getText();
         }
-        return JOptionPane.showOptionDialog(frame, message + "\n\nPlay again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
+        return JOptionPane.showOptionDialog(frame, message + "\n\nPlay again?", title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, gameWinIcon, options, null);
     }
 
     //Ask the user for their name
@@ -680,7 +689,7 @@ public class GUI implements ActionListener
 
         do
         {
-            name = JOptionPane.showInputDialog(frame, message, "Who IS that minesweeper master??", JOptionPane.QUESTION_MESSAGE);
+            name = (String)JOptionPane.showInputDialog(frame, message, "Who IS that minesweeper master??", JOptionPane.QUESTION_MESSAGE, highScoreIcon, null, "Your name here");
         }
         while(name == null || name.length() < 1 || name.length() > 10);
 
@@ -689,7 +698,7 @@ public class GUI implements ActionListener
 
     private void showAboutDialog()
     {
-        JOptionPane.showMessageDialog(frame, "Made by Kiran Bhadury\ngithub.com/kbhadury", "About this game", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(frame, "Made by Kiran Bhadury\ngithub.com/kbhadury", "About this game", JOptionPane.INFORMATION_MESSAGE, duckIcon);
     }
 
     private void showHelpDialog()
