@@ -124,24 +124,24 @@ public class GUI implements ActionListener
         //Load images and help content
         try
         {
-            flagBI = ImageIO.read(new File("images/flag.png"));
-            questionBI = ImageIO.read(new File("images/question.png"));
-            mineBI = ImageIO.read(new File("images/mine.png"));
-            donutBI = ImageIO.read(new File("images/donut.png"));
-            badFlagBI = ImageIO.read(new File("images/badFlag.png"));
+            flagBI = ImageIO.read(getClass().getResourceAsStream("images/flag.png"));
+            questionBI = ImageIO.read(getClass().getResourceAsStream("images/question.png"));
+            mineBI = ImageIO.read(getClass().getResourceAsStream("images/mine.png"));
+            donutBI = ImageIO.read(getClass().getResourceAsStream("images/donut.png"));
+            badFlagBI = ImageIO.read(getClass().getResourceAsStream("images/badFlag.png"));
 
             numbersBI = new BufferedImage[9];
             for(int i = 1; i <= 8; ++i)
             {
-                numbersBI[i] = ImageIO.read(new File("images/" + i + ".png"));
+                numbersBI[i] = ImageIO.read(getClass().getResourceAsStream("images/" + i + ".png"));
             }
 
-            duckIcon = new ImageIcon("images/Duck.jpg");
-            gameOverIcon = new ImageIcon("images/gameOver.png");
-            gameWinIcon = new ImageIcon("images/gameWin.png");
-            highScoreIcon = new ImageIcon("images/highScore.png");
+            duckIcon = new ImageIcon(getClass().getResource("images/Duck.jpg"));
+            gameOverIcon = new ImageIcon(getClass().getResource("images/gameOver.png"));
+            gameWinIcon = new ImageIcon(getClass().getResource("images/gameWin.png"));
+            highScoreIcon = new ImageIcon(getClass().getResource("images/highScore.png"));
 
-            helpContent = new JEditorPane("file:howTo.html");
+            helpContent = new JEditorPane(getClass().getResource("howTo.html"));
             helpContent.setPreferredSize(new Dimension(BOARD_PX, BOARD_PX));
             helpContent.setEditable(false);
             helpScrollPane = new JScrollPane(helpContent, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -149,6 +149,7 @@ public class GUI implements ActionListener
         catch(IOException ioEx)
         {
             System.err.println(ioEx.getMessage());
+            ioEx.printStackTrace();
             System.exit(1);
         }
         mineSkinBI = mineBI;
