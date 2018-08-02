@@ -8,4 +8,4 @@ _Minesweeper!_ runs on Java.  If you don't have Java installed on your computer,
 No Internet access is needed to play the game.
 
 ## To install
-Download the `Game/` directory.  Inside it, you should see `Minesweeper.jar` and `scores.dat`.  Double-click on `Minesweeper.jar` to play.
+Go the the "Releases" tab at the top of this page and download `Minesweeper.jar` and `scores.dat`.  Put both of these files into one folder.  Then double-click on `Minesweeper.jar` to play.
